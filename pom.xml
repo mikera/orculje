@@ -28,5 +28,10 @@
   		<artifactId>swing-console</artifactId>
   		<version>0.0.2</version>
   	</dependency>
+  	<dependency>
+  		<groupId>net.mikera</groupId>
+  		<artifactId>cljunit</artifactId>
+  		<version>0.2.0</version>
+  	</dependency>
   </dependencies>
 </project>
