@@ -16,6 +16,8 @@
 (deftest test-location
   (testing "Location building"
     (let [l (loc 1 2 3)]
-      (== 1 (.x l)))
+      (== 1 (.x l))
+      (== 2 (get l 1)))
     (let [l (loc [1 2 3])]
-      (== 1 (.x l)))))
+      (== 1 (.x l))
+      (== 3 (get l 2)))))
