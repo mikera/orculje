@@ -20,7 +20,10 @@
       (== 2 (get l 1)))
     (let [l (loc [1 2 3])]
       (== 1 (.x l))
-      (== 3 (get l 2)))))
+      (== 3 (get l 2))))
+  (testing "Location compare"
+    (is (= (loc 1 2 3) (loc [1 2 3])))
+    (is (not (= (loc 1 2 3) (loc 1 2 4))))))
 
 (deftest test-thing-locations
   (let [game (empty-game)

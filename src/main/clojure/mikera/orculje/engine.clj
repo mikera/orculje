@@ -46,7 +46,13 @@
           0 (.x loc)
           1 (.y loc)
           2 (.z loc)
-          not-found)))) 
+          not-found)))
+  java.lang.Object
+    (equals [a b]
+      (if (instance? Location b)
+        (let [^Location b b]
+          (and (== (.x a) (.x b)) (== (.y a) (.y b)) (== (.z a) (.z b))))
+        false))) 
 
 (defrecord Game [^PersistentTreeGrid world    ;; grid of terrain
                  ^PersistentTreeGrid things   ;; grid of things (contains vectors)
