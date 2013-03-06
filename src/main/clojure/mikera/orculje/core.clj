@@ -11,8 +11,11 @@
 (defn loc? [loc]
   (instance? mikera.orculje.engine.Location loc))
 
-(defn loc [^long x ^long y ^long z]
-  (engine/->Location x y z))
+(defn loc 
+  ([xs]
+    (engine/->Location (xs 0) (xs 1) (xs 2)))
+  ([^long x ^long y ^long z]
+    (engine/->Location x y z)))
 
 ;; =======================================================
 ;; Thing subsystem
