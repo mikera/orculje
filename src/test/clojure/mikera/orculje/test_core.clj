@@ -21,3 +21,11 @@
     (let [l (loc [1 2 3])]
       (== 1 (.x l))
       (== 3 (get l 2)))))
+
+(deftest test-thing-locations
+  (testing "adding things to map"
+    (let [game (empty-game)
+          l (loc 1 2 3)
+          t (thing {})
+          game (add-thing game l t)]
+      (is (= 1 (count (things game l)))))))

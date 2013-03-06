@@ -1,4 +1,5 @@
 (ns mikera.orculje.core
+  (:use mikera.cljutils.error)
   (:import [mikera.engine PersistentTreeGrid])
   (:require [mikera.orculje.engine :as engine]))
 
@@ -59,3 +60,16 @@
     (.get ^PersistentTreeGrid (.things game) (.x loc) (.y loc) (.z loc)))
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.things game) (int x) (int y) (int z))))
+
+(defn add-thing 
+  [^mikera.orculje.engine.Game game 
+   ^mikera.orculje.engine.Location loc 
+   ^mikera.orculje.engine.Thing thing]
+  (let [cur-loc (:location thing)
+        cur-things (or (things game loc) [])]
+    (when cur-loc (error "Things already has a location!"))
+    (let [^PersistentTreeGrid cur-grid (:things game)
+          new-thing (assoc thing :location loc)
+          new-things (conj cur-things new-thing)]
+      (assoc game :things
+        (.set cur-grid (.x loc) (.y loc) (.z loc) new-things)))))
