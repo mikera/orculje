@@ -6,6 +6,15 @@
 (set! *unchecked-math* true)
 
 ;; =======================================================
+;; location handling
+
+(defn loc? [loc]
+  (instance? mikera.orculje.engine.Location loc))
+
+(defn loc [^long x ^long y ^long z]
+  (engine/->Location x y z))
+
+;; =======================================================
 ;; Thing subsystem
 
 (defn thing [props]
