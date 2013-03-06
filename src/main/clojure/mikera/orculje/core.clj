@@ -2,6 +2,8 @@
   (:import [mikera.engine PersistentTreeGrid])
   (:require [mikera.orculje.engine :as engine]))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
 
 ;; =======================================================
 ;; Thing subsystem
@@ -29,3 +31,7 @@
     (PersistentTreeGrid/EMPTY) ;; no world terrain
     (PersistentTreeGrid/EMPTY) ;; no things
     ))
+
+(defn terrain
+  ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
+    (.get ^PersistentTreeGrid (.world game) (int x) (int y) (int z))))
