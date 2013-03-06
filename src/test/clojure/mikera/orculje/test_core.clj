@@ -5,4 +5,5 @@
 (deftest test-thing
   (testing "Thing construction"
     (let [t (thing {:id 1 :name 'bob})]
-      (is (= 'bob (? t :name))))))
+      (is (= 'bob (? t :name)))
+      (is (= 1 (? t :id))))))
