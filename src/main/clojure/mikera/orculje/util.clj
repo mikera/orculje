@@ -1,7 +1,8 @@
 (ns mikera.orculje.util)
 
 (defn find-identical-position
-  "Searches a vector for an identical item and returns the index, or -1 if not found"
+  "Searches a vector for an identical item and returns the index, or -1 if not found.
+   Mainly used to pick out the position of a thing within a specific location"
   ^long [item ^clojure.lang.PersistentVector vector]
   (let [c (count vector)]
     (loop [i (int 0)]

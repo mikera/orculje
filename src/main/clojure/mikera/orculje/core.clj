@@ -10,10 +10,13 @@
 ;; =======================================================
 ;; location handling
 
-(defn loc? [loc]
-  (instance? mikera.orculje.engine.Location loc))
+(defn loc? 
+  "Returns true if loc is a valid Location object" 
+  ([loc]
+    (instance? mikera.orculje.engine.Location loc)))
 
 (defn loc 
+  "Constructs a new Location"
   ([xs]
     (engine/->Location (xs 0) (xs 1) (xs 2)))
   ([^long x ^long y ^long z]
@@ -22,19 +25,24 @@
 ;; =======================================================
 ;; Thing subsystem
 
-(defn thing [props]
-  (engine/map->Thing props))
+(defn thing 
+  "Constructs a new thing with the given properties."
+  ([props]
+  (engine/map->Thing props)))
 
-(defn thing? [t]
-  (instance? mikera.orculje.engine.Thing t))
+(defn thing? 
+  "Returns tru if t is a Thing" 
+  ([t]
+    (instance? mikera.orculje.engine.Thing t)))
 
 (defmacro ? 
+  "Queries a property of a Thing"
   ([thing key]
     `(let [k# ~key
            t# ~thing]
        (k# t#)))
   ([game thing key]
-    `(let [t# ((:things g) (:id ~thing))]
+    `(let [t# ((:thing-map ~game) (:id ~thing))]
        (? t# ~key))))
 
 ;; =======================================================
@@ -50,13 +58,14 @@
     )))
 
 (defn new-id 
-  [game]
-  (let [tm (:thing-map game)]
-    (loop [max (int 1000)]
-      (let [id (Long. (long (Rand/d max)))]
-        (if (tm id)
-          (recur (* 2 max))
-          id)))))
+  "Creates a new, unique Long ID for a given game"
+  ([game]
+    (let [tm (:thing-map game)]
+      (loop [max (int 1000)]
+        (let [id (Long. (long (Rand/d max)))]
+          (if (tm id)
+            (recur (* 2 max))
+            id))))))
 
 (defn terrain
   "Returns the terrain in a given location"

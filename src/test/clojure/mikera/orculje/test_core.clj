@@ -26,7 +26,7 @@
   (testing "adding things to map"
     (let [game (empty-game)
           l (loc 1 2 3)
-          t (thing {})
+          t (thing {:foo :bar})
           game (add-thing game l t)
           ts (things game l)
           nt (first ts)
@@ -36,4 +36,6 @@
       (is (= l (:location nt)))
       (is new-id)
       (is (= nt ((:thing-map game) new-id)))
-      (is (validate game)))))
+      (is (validate game))
+      (is (= :bar (? nt :foo)))
+      (is (= :bar (? game nt :foo))))))
