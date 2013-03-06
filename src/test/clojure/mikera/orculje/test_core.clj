@@ -27,5 +27,8 @@
     (let [game (empty-game)
           l (loc 1 2 3)
           t (thing {})
-          game (add-thing game l t)]
-      (is (= 1 (count (things game l)))))))
+          game (add-thing game l t)
+          ts (things game l)]
+      (is (= 1 (count ts)))
+      (is (vector? ts))
+      (is (= l (:location (first ts)))))))
