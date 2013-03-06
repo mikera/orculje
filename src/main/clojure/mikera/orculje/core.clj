@@ -94,3 +94,7 @@
   (let [^mikera.orculje.engine.Location cur-loc (:location thing)]
     (when (not cur-loc (error "Thing is not on map!")))
     (TODO)))
+
+(defn validate [game]
+  "Validates a game"
+  (engine/validate-game game))

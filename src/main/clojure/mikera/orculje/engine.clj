@@ -1,4 +1,5 @@
 (ns mikera.orculje.engine
+  (:use [mikera.orculje util])
   (:import [mikera.engine PersistentTreeGrid]))
 
 (set! *warn-on-reflection* true)
@@ -53,3 +54,24 @@
                  ])
 
 (defrecord Thing [])
+
+;; ======================================================
+;; validation code
+
+(defn validate-game-thing [game thing]
+  (and
+    (:id thing)
+    (if-let [^Location loc (:location thing)]
+      (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc)))))))
+
+(defn validate-game [game]
+  (and 
+    (instance? Game game)
+    (let [world (:world game)
+          things (:things game)
+          thing-map (:thing-map game)]
+      (and 
+        world
+        things 
+        thing-map
+        (every? (partial validate-game-thing game) (vals thing-map))))))

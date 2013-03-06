@@ -35,4 +35,5 @@
       (is (vector? ts))
       (is (= l (:location nt)))
       (is new-id)
-      (is (= nt ((:thing-map game) new-id))))))
+      (is (= nt ((:thing-map game) new-id)))
+      (is (validate game)))))
