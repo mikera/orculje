@@ -1,6 +1,7 @@
 (ns mikera.orculje.core
   (:use mikera.cljutils.error)
   (:import [mikera.engine PersistentTreeGrid])
+  (:import [mikera.util Rand])
   (:require [mikera.orculje.engine :as engine]))
 
 (set! *warn-on-reflection* true)
@@ -45,7 +46,17 @@
     (engine/->Game
       (PersistentTreeGrid/EMPTY) ;; no world terrain
       (PersistentTreeGrid/EMPTY) ;; no things
+      {}                         ;; no ids map to things
     )))
+
+(defn new-id 
+  [game]
+  (let [tm (:thing-map game)]
+    (loop [max (int 1000)]
+      (let [id (Long. (long (Rand/d max)))]
+        (if (tm id)
+          (recur (* 2 max))
+          id)))))
 
 (defn terrain
   "Returns the terrain in a given location"
@@ -65,11 +76,21 @@
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
    ^mikera.orculje.engine.Thing thing]
-  (let [cur-loc (:location thing)
-        cur-things (or (things game loc) [])]
-    (when cur-loc (error "Things already has a location!"))
+  (let [cur-things (or (things game loc) [])]
+    ;; TODO: error if thing id already present
     (let [^PersistentTreeGrid cur-grid (:things game)
-          new-thing (assoc thing :location loc)
+          id (new-id game)
+          new-thing (-> thing
+                      (assoc :id id)
+                      (assoc :location loc))
           new-things (conj cur-things new-thing)]
-      (assoc game :things
-        (.set cur-grid (.x loc) (.y loc) (.z loc) new-things)))))
+      (-> game
+        (assoc :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
+        (assoc :thing-map (assoc (:thing-map game) id new-thing))))))
+
+(defn remove-thing 
+  [^mikera.orculje.engine.Game game 
+   ^mikera.orculje.engine.Thing thing]
+  (let [^mikera.orculje.engine.Location cur-loc (:location thing)]
+    (when (not cur-loc (error "Thing is not on map!")))
+    (TODO)))

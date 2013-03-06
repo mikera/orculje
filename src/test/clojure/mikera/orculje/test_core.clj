@@ -28,7 +28,11 @@
           l (loc 1 2 3)
           t (thing {})
           game (add-thing game l t)
-          ts (things game l)]
+          ts (things game l)
+          nt (first ts)
+          new-id (:id nt)]
       (is (= 1 (count ts)))
       (is (vector? ts))
-      (is (= l (:location (first ts)))))))
+      (is (= l (:location nt)))
+      (is new-id)
+      (is (= nt ((:thing-map game) new-id))))))

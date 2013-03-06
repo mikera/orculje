@@ -47,7 +47,9 @@
           2 (.z loc)
           not-found)))) 
 
-(defrecord Game [^PersistentTreeGrid world 
-                 ^PersistentTreeGrid things])
+(defrecord Game [^PersistentTreeGrid world    ;; grid of terrain
+                 ^PersistentTreeGrid things   ;; grid of things (contains vectors)
+                 thing-map                    ;; map of id -> thing
+                 ])
 
 (defrecord Thing [])
