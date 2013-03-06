@@ -20,3 +20,12 @@
   ([game thing key]
     `(let [t# ((:things g) (:id ~thing))]
        (? t# ~key))))
+
+;; =======================================================
+;; Game subsystem
+
+(defn empty-game []
+  (engine/->Game
+    (PersistentTreeGrid/EMPTY) ;; no world terrain
+    (PersistentTreeGrid/EMPTY) ;; no things
+    ))
