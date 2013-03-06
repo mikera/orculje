@@ -104,7 +104,7 @@
   (let [thing-map (:thing-map game)
         things ^PersistentTreeGrid (:things game)
         id (or (:id thing) (error "Thing has no ID!"))
-        thing (or (thing-map :id) (error "Can't find thing! " id))
+        thing (or (thing-map id) (error "Can't find thing! " id))
         ^mikera.orculje.engine.Location loc (or (:location thing) (error "Thing is not on map!"))
         x (.x loc) y (.y loc) z (.z loc)
         thing-vec (.get things x y z)

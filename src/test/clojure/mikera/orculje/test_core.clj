@@ -23,19 +23,24 @@
       (== 3 (get l 2)))))
 
 (deftest test-thing-locations
-  (testing "adding things to map"
-    (let [game (empty-game)
+  (let [game (empty-game)
           l (loc 1 2 3)
           t (thing {:foo :bar})
           game (add-thing game l t)
           ts (things game l)
           nt (first ts)
           new-id (:id nt)]
-      (is (= 1 (count ts)))
-      (is (vector? ts))
-      (is (= l (:location nt)))
-      (is new-id)
-      (is (= nt ((:thing-map game) new-id)))
-      (is (validate game))
-      (is (= :bar (? nt :foo)))
-      (is (= :bar (? game nt :foo))))))
+      (testing "adding to map" 
+        (is (= 1 (count ts)))
+	      (is (vector? ts))
+	      (is (= l (:location nt)))
+	      (is new-id)
+	      (is (= nt ((:thing-map game) new-id)))
+	      (is (= :bar (? nt :foo)))
+	      (is (= :bar (? game nt :foo)))
+        (is (validate game)))
+      (testing "removal from map"
+        (let [game (remove-thing game nt)
+              ts (things game l)]
+          (is (not (seq ts)))
+          (is (validate game))))))
