@@ -1,5 +1,6 @@
 (ns mikera.orculje.core
   (:use mikera.cljutils.error)
+  (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand])
   (:require [mikera.orculje.engine :as engine]))
@@ -100,9 +101,17 @@
 (defn remove-thing 
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Thing thing]
-  (let [^mikera.orculje.engine.Location cur-loc (:location thing)]
-    (when (not cur-loc (error "Thing is not on map!")))
-    (TODO)))
+  (let [thing-map (:thing-map game)
+        things ^PersistentTreeGrid (:things game)
+        id (or (:id thing) (error "Thing has no ID!"))
+        thing (or (thing-map :id) (error "Can't find thing! " id))
+        ^mikera.orculje.engine.Location loc (or (:location thing) (error "Thing is not on map!"))
+        x (.x loc) y (.y loc) z (.z loc)
+        thing-vec (.get things x y z)
+        reduced-thing-vec (remove-from-vector thing thing-vec)]
+    (-> game
+      (assoc :things (.set things x y z reduced-thing-vec))
+      (assoc :thing-map (dissoc thing-map id)))))
 
 (defn validate [game]
   "Validates a game"
