@@ -35,12 +35,24 @@
 ;; =======================================================
 ;; Game subsystem
 
-(defn empty-game []
-  (engine/->Game
-    (PersistentTreeGrid/EMPTY) ;; no world terrain
-    (PersistentTreeGrid/EMPTY) ;; no things
-    ))
+(defn empty-game 
+  "Creates a new, empty game object"
+  ([]
+    (engine/->Game
+      (PersistentTreeGrid/EMPTY) ;; no world terrain
+      (PersistentTreeGrid/EMPTY) ;; no things
+    )))
 
 (defn terrain
+  "Returns the terrain in a given location"
+  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
+    (.get ^PersistentTreeGrid (.world game) (.x loc) (.y loc) (.z loc)))
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.world game) (int x) (int y) (int z))))
+
+(defn things
+  "Returns a vector of things in a given location, or nil if none found" 
+  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
+    (.get ^PersistentTreeGrid (.things game) (.x loc) (.y loc) (.z loc)))
+  ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
+    (.get ^PersistentTreeGrid (.things game) (int x) (int y) (int z))))
