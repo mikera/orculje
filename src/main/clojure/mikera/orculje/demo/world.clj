@@ -1,6 +1,9 @@
 (ns mikera.orculje.demo.world
   (:use mikera.orculje.core))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
+
 ;; WORLD SIMULATION
 ;; everything internal to the game goes in here
 

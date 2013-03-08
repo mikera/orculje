@@ -6,10 +6,16 @@
 ;; screen filling and manipluation
 
 (defprotocol PDisplay
-  (display-char [x])
-  (display-font [x])
-  (display-foreground [x])
-  (display-background [x]))
+  (display-char [m])
+  (display-font [m])
+  (display-foreground [m])
+  (display-background [m]))
+
+(defn draw 
+  "Draws an object at a specified location on a console"
+  [^JConsole console ^long x ^long y v]
+  (.setCursorPos console (int x) (int y))
+  (.write console (str v)))
 
 ;; key action handling
 
