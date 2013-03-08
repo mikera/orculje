@@ -1,6 +1,7 @@
 (ns mikera.orculje.demo.main
   (:use mikera.cljutils.error)
-  (:import [javax.swing JFrame])
+  (:use mikera.orculje.gui)
+  (:import [javax.swing JFrame  JComponent])
   (:import [java.awt Font])
   (:import [mikera.gui JConsole]))
 
@@ -16,6 +17,7 @@
     (let [jc (JConsole. 100 40)]
       (.setMainFont jc font)
       jc)))
+
 
 (defn main 
   "Main entry point to the demo, called directly from Java main() method in DemoApp"
