@@ -1,6 +1,17 @@
 (ns mikera.orculje.gui
   (:import [java.awt.event ActionListener KeyEvent])
+  (:import [mikera.gui JConsole ConsoleData])
   (:import [javax.swing JComponent KeyStroke Action AbstractAction]))
+
+;; screen filling and manipluation
+
+(defprotocol PDisplay
+  (display-char [x])
+  (display-font [x])
+  (display-foreground [x])
+  (display-background [x]))
+
+;; key action handling
 
 (defmacro action 
   "creates a java.awt.ActionListner that executes the given code"
@@ -8,7 +19,6 @@
     `(proxy [AbstractAction] []
        (actionPerformed [~'event]
          ~body))))
-
 
 (defn add-input-binding [^JComponent comp ^KeyStroke keystroke f]
   (let [input-map (.getInputMap comp JComponent/WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
