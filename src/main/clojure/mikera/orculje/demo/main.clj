@@ -1,6 +1,7 @@
 (ns mikera.orculje.demo.main
   (:use mikera.cljutils.error)
   (:use mikera.orculje.gui)
+  (:require [mikera.orculje.demo.world :as world])
   (:import [javax.swing JFrame JComponent KeyStroke])
   (:import [java.awt Font])
   (:import [java.awt.event KeyEvent])
@@ -41,15 +42,20 @@
       (add-input-binding comp (keystroke-from-keyevent ke) (make-input-handler state (str k))))))
 
 (defn launch [state]
-  (let [^JFrame frame (new-frame)
-          ^JConsole jc (new-console)]
+  (let [^JFrame frame (:frame state)
+        ^JConsole jc (:console state)]
       (setup-input jc state) 
       (.add (.getContentPane frame) jc)
       (.pack frame)
       (.setVisible frame true)
       frame))
 
-(def s {:game (atom nil)})
+(defn new-state []
+  {:game (atom (world/new-game))
+   :console (new-console)
+   :frame (new-frame)})
+
+(def s (new-state))
 
 (defn main 
   "Main entry point to the demo, called directly from Java main() method in DemoApp"
