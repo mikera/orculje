@@ -21,25 +21,35 @@
       (.setFocusable jc true)
       jc)))
 
-(defn make-input-handler 
-  "Builds an input handler for the specified state object"
+(defn make-input-action 
+  "Builds an input action handler for the specified state object"
   ([state k]
     (fn []
-      (println (str "Key handled: " k)))))
+      (let [hand @(:event-handler state)]
+        (or
+          (hand k)
+          (println (str "Key pressed but no event handler ready: " k)))))))
 
+
+(defn make-main-handler
+  [state]
+  (fn [k]
+    (let [k ({"5" "."} k k) ;; handle synonyms
+          ]
+      (swap! (:game state) world/handle-command k))))
 
 (defn setup-input 
   ([^JComponent comp state]
     (doseq [k "abcdefghijklmnopqrstuvwxyz 01234567890!\"\\/£$%^&*()'~<>?@#_-+=[]{},."]
-      (add-input-binding comp (keystroke k) (make-input-handler state (str k))))
+      (add-input-binding comp (keystroke k) (make-input-action state (str k))))
     (doseq [k "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
-      (add-input-binding comp (keystroke k) (make-input-handler state (str k))))
+      (add-input-binding comp (keystroke k) (make-input-action state (str k))))
     (doseq [[^KeyEvent ke k] {KeyEvent/VK_LEFT "4"
                               KeyEvent/VK_RIGHT "6"
                               KeyEvent/VK_UP "2"
                               KeyEvent/VK_DOWN "8"
                               KeyEvent/VK_ESCAPE "Q"}]
-      (add-input-binding comp (keystroke-from-keyevent ke) (make-input-handler state (str k))))))
+      (add-input-binding comp (keystroke-from-keyevent ke) (make-input-action state (str k))))))
 
 (defn launch [state]
   (let [^JFrame frame (:frame state)
@@ -51,9 +61,12 @@
       frame))
 
 (defn new-state []
-  {:game (atom (world/new-game))
-   :console (new-console)
-   :frame (new-frame)})
+  (let [state {:game (atom (world/new-game))
+               :console (new-console)
+               :frame (new-frame)
+               :event-handler (atom nil)}]
+    (reset! (:event-handler state) (make-main-handler state))
+    state))
 
 (def s (new-state))
 

@@ -8,4 +8,13 @@
 
 (defn new-game []
   (let [game (empty-game)]
-    game))
+    (merge game
+           {:turn 0})))
+
+(defn handle-command
+  "Handles a command, expressed as a complete command String"
+  [game k]
+  (let [turn (inc (:turn game))]
+    (println (str "Handling turn " turn " with keypress " k))
+    (-> game
+      (assoc :turn turn))))
