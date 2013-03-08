@@ -3,7 +3,7 @@
   (:require [mikera.orculje.gui :as gui])
   (:require [mikera.orculje.demo.world :as world])
   (:import [javax.swing JFrame JComponent KeyStroke])
-  (:import [java.awt Font])
+  (:import [java.awt Font Color])
   (:import [java.awt.event KeyEvent])
   (:import [mikera.gui JConsole]))
 
@@ -23,6 +23,7 @@
       (.setMainFont jc font)
       (.setFocusable jc true)
       (.setCursorVisible jc false)
+      (.setCursorBlink jc false)
       jc)))
 
 (defn make-input-action 
@@ -38,11 +39,12 @@
   (let [^JConsole jc (:console state)
         w (.getColumns jc)
         h (.getRows jc)
-        gw 6 ;; (- w 20)
+        gw (- w 40)
         gh (- h 5)]
+    (.setBackground jc (Color. 0x203040))
     (dotimes [y gh]
       (dotimes [x gw]
-        (gui/draw jc x y "#")))
+        (gui/draw jc x y (str x))))
     (.repaint jc)))
 
 (defn make-main-handler
