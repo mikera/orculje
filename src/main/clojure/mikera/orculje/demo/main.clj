@@ -39,7 +39,7 @@
   (let [^JConsole jc (:console state)
         w (.getColumns jc)
         h (.getRows jc)
-        gw (- w 40)
+        gw (- w 20)
         gh (- h 5)]
     (.setBackground jc (Color. 0x203040))
     (dotimes [y gh]
