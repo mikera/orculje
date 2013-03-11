@@ -82,6 +82,10 @@
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.things game) (int x) (int y) (int z))))
 
+(defn get-thing [game id-or-thing]
+  (let [id (if (number? id-or-thing) id-or-thing (:id id-or-thing))]
+    ((:thing-map game) id)))
+
 (defn add-thing 
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
@@ -96,7 +100,8 @@
           new-things (conj cur-things new-thing)]
       (-> game
         (assoc :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-        (assoc :thing-map (assoc (:thing-map game) id new-thing))))))
+        (assoc :thing-map (assoc (:thing-map game) id new-thing))
+        (assoc :last-added-id id)))))
 
 (defn remove-thing 
   [^mikera.orculje.engine.Game game 

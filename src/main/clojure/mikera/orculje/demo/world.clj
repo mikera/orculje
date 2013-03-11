@@ -7,6 +7,7 @@
 ;; WORLD SIMULATION
 ;; everything internal to the game goes in here
 
+;; ======================================================
 ;; key external functions (called by main namespace)
 
 
