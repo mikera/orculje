@@ -18,6 +18,12 @@
   (.setCursorPos console (int x) (int y))
   (.write console (str v)))
 
+(defn draw-char 
+  "Draws an object at a specified location on a console"
+  [^JConsole console ^long x ^long y ^long ch]
+  (.setCursorPos console (int x) (int y))
+  (.write console (char ch)))
+
 ;; key action handling
 
 (defmacro action 
