@@ -11,8 +11,7 @@
 
 (defn new-game []
   (let [game (empty-game)]
-    (merge game
-           {:turn 0})))
+    (merge {:turn 0})))
 
 (defn handle-command
   "Handles a command, expressed as a complete command String"
