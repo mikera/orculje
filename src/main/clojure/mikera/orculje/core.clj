@@ -68,7 +68,7 @@
             (recur (* 2 max))
             id))))))
 
-(defn terrain
+(defn get-tile
   "Returns the terrain in a given location"
   ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
     (.get ^PersistentTreeGrid (.world game) (.x loc) (.y loc) (.z loc)))
