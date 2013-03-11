@@ -81,6 +81,13 @@
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.world game) (int x) (int y) (int z))))
 
+(defn set-tile
+  "Sets the terrain in a given location"
+  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc value]
+    (assoc game :world (.set ^PersistentTreeGrid (.world game) (.x loc) (.y loc) (.z loc) value)))
+  ([^mikera.orculje.engine.Game game x y z value]
+    (assoc game :world (.set ^PersistentTreeGrid (.world game) (int x) (int y) (int z) value))))
+
 (defn get-things
   "Returns a vector of things in a given location, or nil if none found" 
   ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
