@@ -9,3 +9,5 @@
     (= [b c] (vector-without [a b c] 0))
     (= [] (vector-without [a] 0))))
 
+(deftest test-colour 
+  (is (instance? java.awt.Color (colour 0xFF0000))))

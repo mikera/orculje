@@ -1,4 +1,5 @@
 (ns mikera.orculje.gui
+  (:use mikera.orculje.util)
   (:import [java.awt.event ActionListener KeyEvent])
   (:import [mikera.gui JConsole ConsoleData])
   (:import [javax.swing JComponent KeyStroke Action AbstractAction]))

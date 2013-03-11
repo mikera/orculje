@@ -1,5 +1,10 @@
 (ns mikera.orculje.util
-  (:use mikera.cljutils.error))
+  (:use mikera.cljutils.error)
+  (:import [java.awt Color]))
+
+(defn colour 
+  ([^long argb]
+    (Color. (bit-or (unchecked-int 0xFF000000) (unchecked-int argb)))))
 
 (defn find-identical-position
   "Searches a vector for an identical item and returns the index, or -1 if not found.
