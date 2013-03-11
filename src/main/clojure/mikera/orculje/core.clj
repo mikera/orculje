@@ -75,7 +75,7 @@
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.world game) (int x) (int y) (int z))))
 
-(defn things
+(defn get-things
   "Returns a vector of things in a given location, or nil if none found" 
   ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
     (.get ^PersistentTreeGrid (.things game) (.x loc) (.y loc) (.z loc)))
@@ -86,7 +86,7 @@
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
    ^mikera.orculje.engine.Thing thing]
-  (let [cur-things (or (things game loc) [])]
+  (let [cur-things (or (get-things game loc) [])]
     ;; TODO: error if thing id already present
     (let [^PersistentTreeGrid cur-grid (:things game)
           id (new-id game)

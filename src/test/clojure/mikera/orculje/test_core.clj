@@ -30,7 +30,7 @@
           l (loc 1 2 3)
           t (thing {:foo :bar})
           game (add-thing game l t)
-          ts (things game l)
+          ts (get-things game l)
           nt (first ts)
           new-id (:id nt)]
       (testing "adding to map" 
@@ -44,6 +44,6 @@
         (is (validate game)))
       (testing "removal from map"
         (let [game (remove-thing game nt)
-              ts (things game l)]
+              ts (get-things game l)]
           (is (not (seq ts)))
           (is (validate game))))))
