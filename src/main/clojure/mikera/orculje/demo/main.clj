@@ -26,14 +26,6 @@
       (.setCursorBlink jc false)
       jc)))
 
-(defn make-input-action 
-  "Builds an input action handler for the specified state object"
-  ([state k]
-    (fn []
-      (let [hand @(:event-handler state)]
-        (or
-          (hand k)
-          (println (str "Key pressed but no event handler ready: " k)))))))
 
 (defn redraw-screen [state]
   (let [^JConsole jc (:console state)
@@ -46,6 +38,15 @@
       (dotimes [x gw]
         (gui/draw jc x y (str x))))
     (.repaint jc)))
+
+(defn make-input-action 
+  "Builds an input action handler for the specified state object"
+  ([state k]
+    (fn []
+      (let [hand @(:event-handler state)]
+        (or
+          (hand k)
+          (println (str "Key pressed but no event handler ready: " k)))))))
 
 (defn make-main-handler
   [state]
