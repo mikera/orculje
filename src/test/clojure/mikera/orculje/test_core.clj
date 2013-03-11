@@ -42,6 +42,13 @@
 	      (is (= :bar (? nt :foo)))
 	      (is (= :bar (? game nt :foo)))
         (is (validate game)))
+      (testing "move with map"
+        (let [nloc (loc 11 12 13)
+              game (move-thing game nt nloc)
+              ots (get-things game l)]
+          (is (not (seq ots)))
+          (is (seq (get-things game nloc)))
+          (is (validate game))))
       (testing "removal from map"
         (let [game (remove-thing game nt)
               ts (get-things game l)]
