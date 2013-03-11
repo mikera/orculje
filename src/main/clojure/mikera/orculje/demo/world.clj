@@ -9,6 +9,7 @@
 
 ;; key external functions (called by main namespace)
 
+
 (defn new-game []
   (let [game (empty-game)]
     (merge {:turn 0})))
