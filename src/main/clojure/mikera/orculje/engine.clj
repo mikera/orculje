@@ -64,11 +64,7 @@
 ;; ======================================================
 ;; data type functions
 
-(defn loc-add 
-  ([^Location a ^Location b]
-    (Location. (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
-  ([^Location a ^long x ^long y ^long z]
-    (Location. (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
+
 
 ;; ======================================================
 ;; validation code

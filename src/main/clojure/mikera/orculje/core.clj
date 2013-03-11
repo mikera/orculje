@@ -23,6 +23,12 @@
   ([^long x ^long y ^long z]
     (engine/->Location x y z)))
 
+(defn loc-add 
+  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+    (engine/->Location (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
+  ([^mikera.orculje.engine.Location a ^long x ^long y ^long z]
+    (engine/->Location (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
+
 ;; =======================================================
 ;; Thing subsystem
 
