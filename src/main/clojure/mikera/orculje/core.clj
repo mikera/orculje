@@ -100,6 +100,11 @@
   (let [id (if (number? id-or-thing) id-or-thing (:id id-or-thing))]
     ((:thing-map game) id)))
 
+(defn all-things 
+  "Returns a sequence of all things in the game"
+  [game]
+  (vals (:thing-map game)))
+
 (defn add-thing 
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
