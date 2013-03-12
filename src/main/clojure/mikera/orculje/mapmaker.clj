@@ -44,5 +44,5 @@
               tloc (loc x y z)]
           (if (get-blocking game tloc)
             (recur (dec i))
-            (add-thing game tloc thing)))))))
+            (add-thing game tloc t)))))))
 
