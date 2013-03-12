@@ -52,7 +52,9 @@
       (if (instance? Location b)
         (let [^Location b b]
           (and (== (.x a) (.x b)) (== (.y a) (.y b)) (== (.z a) (.z b))))
-        false))) 
+        false))
+    (toString [this]
+      (str [(.x this) (.y this) (.z this)]))) 
 
 (defrecord Game [^PersistentTreeGrid world    ;; grid of terrain
                  ^PersistentTreeGrid things   ;; grid of things (contains vectors)

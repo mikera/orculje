@@ -56,6 +56,9 @@
 ;; =======================================================
 ;; Game subsystem
 
+(defn game? [game]
+  (instance? mikera.orculje.engine.Game game))
+
 (defn empty-game 
   "Creates a new, empty game object"
   ([]
