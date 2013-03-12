@@ -163,6 +163,15 @@
       (assoc :thing-map (assoc thing-map id new-thing))
       (assoc :last-added-id id))))
 
+(defn get-pred 
+  "Gets the first object satisfying a predicate in a square. Considers tile last."
+  ([game loc pred]
+    (let [ts (get-things game loc)
+          tl (get-tile game loc)]
+      (or 
+        (find/find-first pred ts)
+        (if (pred tl) tl nil)))))
+
 (defn get-blocking 
   "Gets the object blocking a specific square"
   ([game loc]
