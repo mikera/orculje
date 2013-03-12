@@ -2,7 +2,7 @@
   (:use mikera.cljutils.error)
   (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
-  (:import [mikera.util Rand])
+  (:import [mikera.util Rand Maths])
   (:require [mikera.orculje.engine :as engine])
   (:require [mikera.cljutils.find :as find]))
 
@@ -29,6 +29,13 @@
     (engine/->Location (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
   ([^mikera.orculje.engine.Location a ^long x ^long y ^long z]
     (engine/->Location (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
+
+(defn direction 
+  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location from-loc 
+                                   ^mikera.orculje.engine.Location to-loc]
+  (mikera.orculje.engine.Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
+                                   (int (Maths/sign (- (.y to-loc) (.y from-loc))))
+                                   (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
 
 ;; =======================================================
 ;; Thing subsystem

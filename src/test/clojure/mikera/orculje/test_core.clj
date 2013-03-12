@@ -2,6 +2,9 @@
   (:use [mikera.orculje core])
   (:use [clojure test]))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
+
 (deftest test-thing
   (testing "Thing construction"
     (let [t (thing {:id 1 :name 'bob})]
@@ -15,15 +18,17 @@
 
 (deftest test-location
   (testing "Location building"
-    (let [l (loc 1 2 3)]
+    (let [^mikera.orculje.engine.Location l (loc 1 2 3)]
       (== 1 (.x l))
       (== 2 (get l 1)))
-    (let [l (loc [1 2 3])]
+    (let [^mikera.orculje.engine.Location l (loc [1 2 3])]
       (== 1 (.x l))
       (== 3 (get l 2))))
   (testing "Location compare"
     (is (= (loc 1 2 3) (loc [1 2 3])))
-    (is (not (= (loc 1 2 3) (loc 1 2 4))))))
+    (is (not (= (loc 1 2 3) (loc 1 2 4)))))
+  (testing "Location direction"
+    (is (= (loc 1 0 -1) (direction (loc 10 5 10) (loc 15 5 5))))))
 
 (deftest test-thing-locations
   (let [game (empty-game)
