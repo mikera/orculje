@@ -2,6 +2,9 @@
   (:use mikera.cljutils.error)
   (:import [java.awt Color]))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
+
 (defn colour 
   ([^long argb]
     (Color. (bit-or (unchecked-int 0xFF000000) (unchecked-int argb)))))
@@ -9,7 +12,7 @@
 (defn find-identical-position
   "Searches a vector for an identical item and returns the index, or -1 if not found.
    Mainly used to pick out the position of a thing within a specific location"
-  ^long [item ^clojure.lang.PersistentVector vector]
+  ^long [item ^clojure.lang.APersistentVector vector]
   (let [c (count vector)]
     (loop [i (int 0)]
       (if (>= i c)
@@ -28,7 +31,7 @@
 
 (defn remove-from-vector
   "Removes a specific object from a vector. Throws an error if the object is not found."
-  [item ^clojure.lang.PersistentVector vector]
+  [item ^clojure.lang.APersistentVector vector]
   (let [i (find-identical-position item vector)]
     (when (< i 0) (error "item not found!"))
     (vector-without vector i)))
