@@ -13,3 +13,6 @@
         t2 (thing {:name "wall"})]
     (is (= "you hit a wall" (verb-phrase nil :the t "hit" :a t2))))
   )
+
+(deftest test-cap
+  (is (= "You" (capitalise "you"))))

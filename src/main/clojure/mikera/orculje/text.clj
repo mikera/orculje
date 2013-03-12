@@ -60,6 +60,11 @@
     (if s (str s " "))
     a)) 
 
+(defn capitalise ^String [^String s]
+  (if (> (count s) 0)
+    (str (Character/toUpperCase (.charAt s 0)) (.substring s 1))
+    s))
+
 (defn verb-phrase [game & terms]
   (loop 
     [context {:person :third
