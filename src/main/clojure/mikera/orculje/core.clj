@@ -3,7 +3,8 @@
   (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand])
-  (:require [mikera.orculje.engine :as engine]))
+  (:require [mikera.orculje.engine :as engine])
+  (:require [mikera.cljutils.find :as find]))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
@@ -153,6 +154,15 @@
       (assoc :things new-things)
       (assoc :thing-map (assoc thing-map id new-thing))
       (assoc :last-added-id id))))
+
+(defn get-blocking 
+  "Gets the object blocking a specific square"
+  ([game loc]
+    (let [ts (get-things game loc)
+          tl (get-tile game loc)]
+      (or 
+        (find/find-first :is-blocking ts)
+        (if (:is-blocking tl) tl nil))))) 
 
 (defn validate [game]
   "Validates a game"
