@@ -48,6 +48,11 @@
 	      (is (= :bar (? nt :foo)))
 	      (is (= :bar (? game nt :foo)))
         (is (validate game)))
+      (testing "update"
+        (let [game (! game nt :changed true)] 
+          (is (not (:changed nt)))
+          (is (:changed (get-thing game nt)))
+          (is (validate game))))
       (testing "move with map"
         (let [nloc (loc 11 12 13)
               game (move-thing game nt nloc)

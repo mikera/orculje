@@ -10,6 +10,8 @@
 (set! *unchecked-math* true)
 
 (declare get-thing)
+(declare update-thing)
+
 
 ;; =======================================================
 ;; location handling
@@ -61,6 +63,19 @@
   ([game thing key]
     `(let [t# ((:thing-map ~game) (:id ~thing))]
        (? t# ~key))))
+
+(defmacro ! 
+  "Sets a property of a Thing"
+  ([thing key value]
+    `(let [k# ~key
+           t# ~thing]
+       (! ~'game t# k# ~value)))
+  ([game thing key value]
+    `(let [game# ~game
+           k# ~key
+           t# ((:thing-map game#) (:id ~thing))
+           t# (assoc t# k# ~value)]
+       (update-thing game# t#))))
 
 (defn location 
   "Gets the location of a thing. TODO Recursively searches parents"
@@ -129,14 +144,16 @@
   (let [cur-things (or (get-things game loc) [])]
     ;; TODO: error if thing id already present
     (let [^PersistentTreeGrid cur-grid (:things game)
-          id (new-id game)
-          new-thing (-> thing
-                      (assoc :id id)
-                      (assoc :location loc))
+          id (or (:id thing) (new-id game))
+          thing-map (:thing-map game)
+          _ (when (thing-map id) (error "Thing already on map!!"))
+          new-thing (as-> thing thing
+                      (assoc thing :id id)
+                      (assoc thing :location loc))
           new-things (conj cur-things new-thing)]
       (-> game
         (assoc :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-        (assoc :thing-map (assoc (:thing-map game) id new-thing))
+        (assoc :thing-map (assoc thing-map id new-thing))
         (assoc :last-added-id id)))))
 
 (defn remove-thing 
@@ -176,6 +193,15 @@
       (assoc :things new-things)
       (assoc :thing-map (assoc thing-map id new-thing))
       (assoc :last-added-id id))))
+
+(defn update-thing
+  "Updates a thing within the game. Warning: must not break validation rules" 
+  (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
+                                ^mikera.orculje.engine.Thing thing]
+    (let [loc (location game thing)]
+      (as-> game game 
+          (remove-thing game thing)
+          (add-thing game loc thing)))))
 
 (defn get-pred 
   "Gets the first object satisfying a predicate in a square. Considers tile last."
