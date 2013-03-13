@@ -77,6 +77,16 @@
            t# (assoc t# k# ~value)]
        (update-thing game# t#))))
 
+(defmacro !+
+  "Adds to a property of a thing"
+  ([thing key value]
+    `(!+ ~'game thing key value))
+  ([game thing key value]
+    `(let [t# ~thing
+           k# ~key
+           v# ~value]
+       (! ~'game t# k# (+ v# (or (k# t#) 0))))))
+
 (defn location 
   "Gets the location of a thing. TODO Recursively searches parents"
   (^mikera.orculje.engine.Location [game thing]

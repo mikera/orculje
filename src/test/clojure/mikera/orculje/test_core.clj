@@ -53,6 +53,10 @@
           (is (not (:changed nt)))
           (is (:changed (get-thing game nt)))
           (is (validate game))))
+      (testing "add"
+        (let [game (!+ game nt :something 100)] 
+          (is (== 100 (? game nt :something)))
+          (is (validate game))))
       (testing "move with map"
         (let [nloc (loc 11 12 13)
               game (move-thing game nt nloc)
