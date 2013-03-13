@@ -73,7 +73,7 @@
   ([game thing key value]
     `(let [game# ~game
            k# ~key
-           t# ((:thing-map game#) (:id ~thing))
+           t# ((:thing-map game#) (:id ~thing)) ;; equivalent of get-thing
            t# (assoc t# k# ~value)]
        (update-thing game# t#))))
 
