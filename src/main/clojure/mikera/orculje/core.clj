@@ -9,6 +9,8 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
 
+(declare get-thing)
+
 ;; =======================================================
 ;; location handling
 
@@ -59,6 +61,11 @@
   ([game thing key]
     `(let [t# ((:thing-map ~game) (:id ~thing))]
        (? t# ~key))))
+
+(defn location 
+  "Gets the location of a thing. TODO Recursively searches parents"
+  (^mikera.orculje.engine.Location [game thing]
+    (:location (get-thing game thing))))
 
 ;; =======================================================
 ;; Game subsystem
