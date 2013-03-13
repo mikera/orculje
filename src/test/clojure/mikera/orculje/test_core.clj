@@ -30,6 +30,20 @@
   (testing "Location direction"
     (is (= (loc 1 0 -1) (direction (loc 10 5 10) (loc 15 5 5))))))
 
+(deftest test-thing-contents
+  (let [game (empty-game)
+        l (loc 1 2 3)
+        t1 (thing {:foo :bar})
+        t2 (thing {:foo :baz})
+        game (add-thing game l t1)
+        t1 (get-thing game (:last-added-id game)) 
+        game (add-thing game t1 t2)
+        t1 (get-thing game t1)
+        t2 (get-thing game (:last-added-id game)) ]
+    (is (= :bar (:foo t1)))
+    (is (= :baz (:foo t2)))
+    (is (= (:id t1) (:location t2)))))
+
 (deftest test-thing-locations
   (let [game (empty-game)
           l (loc 1 2 3)

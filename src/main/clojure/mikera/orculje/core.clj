@@ -174,9 +174,10 @@
         thing-map (:thing-map game)
         _ (when (thing-map id) (error "Thing already present!!"))
         parent (if (number? parent) (thing-map parent) parent)
+        parent-id (:id parent)
         new-thing (as-> thing thing
-                (assoc thing :id id)
-                (assoc thing :location loc))
+                        (assoc thing :id id)
+                        (assoc thing :location parent-id))
         parent (assoc parent :things (conj (or (:things parent) []) new-thing))]
       (-> game
         (update-thing parent) 
