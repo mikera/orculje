@@ -88,9 +88,12 @@
        (! ~'game t# k# (+ v# (or (k# t#) 0))))))
 
 (defn location 
-  "Gets the location of a thing. TODO Recursively searches parents"
+  "Gets the location of a thing."
   (^mikera.orculje.engine.Location [game thing]
-    (:location (get-thing game thing))))
+    (loop [l (:location (get-thing game thing))]
+      (if (instance? mikera.orculje.engine.Location l)
+        l
+        (recur (:location (get-thing game l)))))))
 
 ;; =======================================================
 ;; Game subsystem
