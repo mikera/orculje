@@ -150,7 +150,7 @@
   [game]
   (vals (:thing-map game)))
 
-(defn add-thing 
+(defn add-thing-to-map
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
    ^mikera.orculje.engine.Thing thing]
@@ -159,7 +159,7 @@
     (let [^PersistentTreeGrid cur-grid (:things game)
           id (or (:id thing) (new-id game))
           thing-map (:thing-map game)
-          _ (when (thing-map id) (error "Thing already on map!!"))
+          _ (when (thing-map id) (error "Thing already present!!"))
           new-thing (as-> thing thing
                       (assoc thing :id id)
                       (assoc thing :location loc))
@@ -169,7 +169,26 @@
         (assoc :thing-map (assoc thing-map id new-thing))
         (assoc :last-added-id id)))))
 
-(defn remove-thing 
+(defn add-thing-to-thing [game parent thing]
+  (let [id (or (:id thing) (new-id game))
+        thing-map (:thing-map game)
+        _ (when (thing-map id) (error "Thing already present!!"))
+        parent (if (number? parent) (thing-map parent) parent)
+        new-thing (as-> thing thing
+                (assoc thing :id id)
+                (assoc thing :location loc))
+        parent (assoc parent :things (conj (or (:things parent) []) new-thing))]
+      (-> game
+        (update-thing parent) 
+        (assoc :thing-map (assoc thing-map id new-thing))
+        (assoc :last-added-id id))))
+
+(defn add-thing [game loc thing]
+  (if (instance? mikera.orculje.engine.Location loc)
+    (add-thing-to-map game loc thing)
+    (add-thing-to-thing game loc thing)))
+
+(defn remove-thing-from-map 
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Thing thing]
   (let [thing-map (:thing-map game)
@@ -183,6 +202,27 @@
     (-> game
       (assoc :things (.set things x y z reduced-thing-vec))
       (assoc :thing-map (dissoc thing-map id)))))
+
+(defn remove-thing-from-thing [game parent thing]
+  (let [thing-map (:thing-map game)
+        parent (get-thing game parent)
+        thing (get-thing game thing)
+        thing-id (or (:id thing) (error "thing has no ID!"))
+        children (:things parent)
+        ci (find/find-index #(= (:id %) thing-id) children)
+        new-children (vector-without children ci)
+        new-parent (assoc parent :things new-children)]
+    (-> game
+      (update-thing new-parent)
+      (assoc :thing-map (dissoc thing-map thing-id)))))
+
+(defn remove-thing
+  [game thing]
+  (let [thing (get-thing game thing)
+        loc (or (:location thing) (error "Thing is not present!"))]
+    (if (instance? mikera.orculje.engine.Location loc)
+      (remove-thing-from-map game thing)
+      (remove-thing-from-thing game loc thing))))
 
 (defn move-thing [^mikera.orculje.engine.Game game 
                   ^mikera.orculje.engine.Thing thing 
