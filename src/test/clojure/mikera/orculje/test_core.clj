@@ -42,6 +42,7 @@
         (is (= 1 (count ts)))
 	      (is (vector? ts))
 	      (is (= l (:location nt)))
+        (is (= l (location game nt)))
 	      (is new-id)
 	      (is (= nt ((:thing-map game) new-id)))
 	      (is (= :bar (? nt :foo)))
