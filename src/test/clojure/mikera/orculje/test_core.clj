@@ -57,7 +57,7 @@
     (is (= :bar (:foo t1)))
     (is (= :baz (:foo t2)))
     (is (= (:id t1) (:location t2)))
-    (println t1)
+    ;; (println t1)
     (is (? t1 :modified-by-child))
     (testing "contents"
       (let [cts (contents t1)]
