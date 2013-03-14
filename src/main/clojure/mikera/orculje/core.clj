@@ -48,6 +48,17 @@
                                    (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
 
 ;; =======================================================
+;; modifier definition
+;;
+;; usage: (modifier :SK (+ value (:ST thing) (:global-st-uplift (:globals game))))
+(defmacro modifier [property expr & {}]
+  `(let [key# ~property]
+     {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
+                ~expr)
+      :priority 0
+      :key key#}))
+
+;; =======================================================
 ;; Thing subsystem
 
 (defn thing 
@@ -60,14 +71,25 @@
   ([t]
     (instance? mikera.orculje.engine.Thing t)))
 
+(defn get-modified-value [game thing modifiers k unmodified-value]
+  (if-let [mods (seq (k modifiers))]
+    (reduce (fn [v mod]
+              (let [mfn (:mod-fn mod)]
+                (mfn mod game thing k v))) unmodified-value mods)
+    unmodified-value))
+
 (defmacro ? 
   "Queries a property of a Thing"
   ([thing key]
     `(let [k# ~key
-           t# ~thing]
-       (k# t#)))
+           t# ~thing
+           v# (k# t#)]
+       (if-let [mods# (:modifiers t#)]
+         (get-modified-value ~'game t# mods# k# v#)
+         v#)))
   ([game thing key]
-    `(let [t# ((:thing-map ~game) (:id ~thing))]
+    `(let [~'game ~game
+           t# ((:thing-map ~'game) (:id ~thing))]
        (? t# ~key))))
 
 (defmacro ! 
@@ -247,10 +269,10 @@
 
 (defn remove-thing-from-thing [game parent thing]
   (let [thing-map (:thing-map game)
-        parent (get-thing game parent)
-        thing (get-thing game thing)
+        parent (or (get-thing game parent) (error "Can't find parent!"))
+        thing (or (get-thing game thing) (error "Can't find child thing!"))
         thing-id (or (:id thing) (error "thing has no ID!"))
-        children (:things parent)
+        children (or (:things parent) (error "No :things in parent ?!?"))
         ci (find/find-index #(= (:id %) thing-id) children)
         new-children (vector-without children ci)
         new-parent (assoc parent :things new-children)]
