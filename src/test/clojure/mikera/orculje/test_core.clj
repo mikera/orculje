@@ -7,7 +7,8 @@
 
 (deftest test-thing
   (testing "Thing construction"
-    (let [t (thing {:id 1 :name 'bob})]
+    (let [game (empty-game)
+          t (thing {:id 1 :name 'bob})]
       (is (= 'bob (? t :name)))
       (is (= 1 (? t :id))))))
 
@@ -29,6 +30,12 @@
     (is (not (= (loc 1 2 3) (loc 1 2 4)))))
   (testing "Location direction"
     (is (= (loc 1 0 -1) (direction (loc 10 5 10) (loc 15 5 5))))))
+
+(deftest test-modifier
+  (let [game (empty-game)
+        t (thing {:SK 10 
+                  :modifiers {:SK [(modifier :SK (+ value 15))]}})]
+    (is (== 25 (? t :SK)))))
 
 (deftest test-thing-contents
   (let [game (empty-game)
