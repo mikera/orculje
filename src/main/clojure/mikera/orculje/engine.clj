@@ -48,6 +48,8 @@
           2 (.z loc)
           not-found)))
   java.lang.Object
+    (hashCode [a]
+      (+ (.x a) (bit-shift-left (.y a) 5) (bit-shift-left (.z a) 10)))
     (equals [a b]
       (if (instance? Location b)
         (let [^Location b b]
