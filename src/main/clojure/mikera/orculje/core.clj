@@ -273,7 +273,6 @@
     (add-thing-to-map game loc thing)
     (add-thing-to-thing game loc thing)))
 
-
 (defn remove-thing-from-map 
   ^mikera.orculje.engine.Game
   [^mikera.orculje.engine.Game game 
@@ -290,12 +289,26 @@
       (assoc game :things (.set things x y z reduced-thing-vec))
       (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id)))))
 
+(defn remove-child-modifiers [parent child-id]
+  (if-let [pmods (:modifiers parent)]
+    (let [filt #(if (== (:source %) child-id) nil %)]
+      (assoc parent :modifiers
+             (reduce 
+               (fn [pmods [k mods]]
+                 (assoc pmods k
+                        (filter filt mods)))
+               pmods
+               pmods)))
+    parent))
+
 (defn- remove-child [parent child]
   (let [thing-id (or (:id child) (error "child has no ID!"))
         children (or (:things parent) (error "No :things in parent ?!?"))
         ci (find/find-index #(= (:id %) thing-id) children)
         new-children (vector-without children ci)]
-    (assoc parent :things new-children)))
+    (as-> parent parent 
+       (remove-child-modifiers parent thing-id)
+       (assoc parent :things new-children))))
 
 (defn remove-thing-from-thing [game parent thing]
   (let [thing-map (:thing-map game)
