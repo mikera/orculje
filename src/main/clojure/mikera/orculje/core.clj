@@ -95,7 +95,7 @@
        (? t# ~key))))
 
 (defmacro ! 
-  "Sets a property of a Thing"
+  "Sets a property of a Thing. Sets the base value (before any modifiers)"
   ([thing key value]
     `(let [k# ~key
            t# ~thing]
@@ -108,7 +108,7 @@
        (update-thing game# t#))))
 
 (defmacro !+
-  "Adds to a property of a thing"
+  "Adds to a property of a thing. Adds to the base value (before any modifiers)"
   ([thing key value]
     `(!+ ~'game thing key value))
   ([game thing key value]
@@ -227,6 +227,10 @@
         (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
         (assoc game :last-added-id id)))))
 
+(defn add-child [parent child]
+  (as-> parent parent
+    (assoc parent :things (conj (or (:things parent) []) child))))
+
 (defn add-thing-to-thing ^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game parent thing]
   (let [id (or (:id thing) (new-id game))
         thing-map (:thing-map game)
@@ -241,7 +245,7 @@
       (as-> game game
         ;(do (println parent) game)
         ;(update-thing game parent) 
-        (merge-thing game parent {:things (conj (or (:things parent) []) new-thing)})
+        (update-thing game (add-child parent new-thing))
         (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
         (assoc game :last-added-id id)
         (do
