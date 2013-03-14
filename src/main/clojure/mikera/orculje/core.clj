@@ -110,7 +110,7 @@
 (defmacro !+
   "Adds to a property of a thing. Adds to the base value (before any modifiers)"
   ([thing key value]
-    `(!+ ~'game thing key value))
+    `(!+ ~'game ~thing ~key ~value))
   ([game thing key value]
     `(let [t# ~thing
            k# ~key
