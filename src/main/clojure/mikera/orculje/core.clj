@@ -243,8 +243,7 @@
         new-children (vector-without children ci)
         new-parent (assoc parent :things new-children)]
     (as-> game game
-      (update-thing game new-parent)
-      (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) thing-id)))))
+      (update-thing game new-parent))))
 
 (defn remove-thing
   [game thing]

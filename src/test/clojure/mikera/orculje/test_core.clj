@@ -59,8 +59,12 @@
       (let [game (remove-thing game t1)]
         (println game)
         (is (not (seq (all-things game))))
-        ;; (is (validate game))
-        ))
+        (is (validate game))))
+    (testing "remove the child!"
+      (let [game (remove-thing game t2)]
+        (println game)
+        (is (== 1 (count (all-things game))))
+        (is (validate game))))
     ))
 
 (deftest test-thing-update
