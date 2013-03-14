@@ -41,7 +41,8 @@
   (let [game (empty-game)
         l (loc 1 2 3)
         t1 (thing {:foo :bar})
-        t2 (thing {:foo :baz})
+        t2 (thing {:foo :baz
+                   :parent-modifiers [(modifier :modified-by-child true)]})
         game (add-thing game l t1)
         t1 (get-thing game (:last-added-id game)) 
         game (add-thing game t1 t2)
@@ -56,6 +57,8 @@
     (is (= :bar (:foo t1)))
     (is (= :baz (:foo t2)))
     (is (= (:id t1) (:location t2)))
+    (println t1)
+    (is (? t1 :modified-by-child))
     (testing "contents"
       (let [cts (contents t1)]
         (is (vector? cts))
@@ -68,9 +71,11 @@
         (is (not (seq (all-things game))))
         (is (validate game))))
     (testing "remove the child!"
-      (let [game (remove-thing game t2)]
+      (let [game (remove-thing game t2)
+            t1 (get-thing game t1)]
         ;;(println game)
         (is (== 1 (count (all-things game))))
+        (is (not (? t1 :modified-by-child))) 
         (is (validate game))))
     ))
 

@@ -76,7 +76,7 @@
     (do 
       ;; (println (str "modifying: " k " on " thing))
       (reduce (fn [v mod]
-                (let [mfn (:mod-fn mod)]
+                (let [mfn (or (:mod-fn mod) (error "Modifier has no :mod-fn ! " mod))]
                   (mfn mod game thing k v))) unmodified-value mods))
     unmodified-value))
 
@@ -235,7 +235,7 @@
               all-mods (:modifiers parent)
               key-mods (k all-mods)
               new-mod (assoc mod :source child-id)]
-          (assoc parent :modifiers (assoc all-mods k (cons key-mods new-mod)))))
+          (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods)))))
         parent
         pmods)))
 
@@ -291,7 +291,7 @@
 
 (defn remove-child-modifiers [parent child-id]
   (if-let [pmods (:modifiers parent)]
-    (let [filt #(if (== (:source %) child-id) nil %)]
+    (let [filt #(if (= child-id (:source %)) nil %)]
       (assoc parent :modifiers
              (reduce 
                (fn [pmods [k mods]]
@@ -395,6 +395,13 @@
 ;; ======================================================
 ;; validation code
 
+(defn validate-modifiers
+  [game thing]
+  (when-let [mods (:modifiers thing)]
+    (valid (associative? mods))
+    (valid (not (vector? mods)))
+    (doseq [[k mod-list] mods]
+      (valid (or (nil? mod-list) (sequential? mod-list))))))
 
 (defn validate-game-thing [game thing]
   (valid (:id thing))
@@ -406,18 +413,21 @@
           (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))))
       (do 
         (valid (number? loc))
-        (valid (loc? (location game thing)))))))
+        (valid (loc? (location game thing))))))
+  (validate-modifiers game thing))
 
 (defn validate-game [game]
   (valid (instance? mikera.orculje.engine.Game game))
-    (let [world (:world game)
-          things (:things game)
-          thing-map (:thing-map game)]
-      (valid world)
-      (valid things) 
-      (valid thing-map (str "No thing map!" game))
-      (valid (every? (partial validate-game-thing game) (vals thing-map)))))
+  (let [world (:world game)
+        things (:things game)
+        thing-map (:thing-map game)]
+    (valid world)
+    (valid things) 
+    (valid thing-map (str "No thing map!" game))
+    (doseq [t (vals thing-map)]
+      (validate-game-thing game t))))
 
 (defn validate [game]
-  "Validates a game, throws an error for ay issue"
-  (validate-game game))
+  "Validates a game, throws an error for any issue"
+  (validate-game game)
+  true)
