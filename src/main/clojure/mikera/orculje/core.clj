@@ -351,9 +351,10 @@
 ;      (assoc :last-added-id id))))
 
 (defn move-thing [game thing loc]
-  (as-> game game
-    (remove-thing game thing)
-    (add-thing game loc thing)))
+  (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
+    (as-> game game
+          (remove-thing game thing)
+          (add-thing game loc thing))))
 
 (defn update-thing
   "Updates a thing within the game. Thing must have valid ID and location
