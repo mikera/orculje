@@ -227,7 +227,7 @@
         (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
         (assoc game :last-added-id id)))))
 
-(defn add-child [parent child]
+(defn- add-child [parent child]
   (as-> parent parent
     (assoc parent :things (conj (or (:things parent) []) child))))
 
@@ -275,15 +275,18 @@
       (assoc game :things (.set things x y z reduced-thing-vec))
       (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id)))))
 
+(defn- remove-child [parent child]
+  (let [thing-id (or (:id child) (error "child has no ID!"))
+        children (or (:things parent) (error "No :things in parent ?!?"))
+        ci (find/find-index #(= (:id %) thing-id) children)
+        new-children (vector-without children ci)]
+    (assoc parent :things new-children)))
+
 (defn remove-thing-from-thing [game parent thing]
   (let [thing-map (:thing-map game)
         parent (or (get-thing game parent) (error "Can't find parent!"))
         thing (or (get-thing game thing) (error "Can't find child thing!"))
-        thing-id (or (:id thing) (error "thing has no ID!"))
-        children (or (:things parent) (error "No :things in parent ?!?"))
-        ci (find/find-index #(= (:id %) thing-id) children)
-        new-children (vector-without children ci)
-        new-parent (assoc parent :things new-children)]
+        new-parent (remove-child parent thing)]
     (as-> game game
       (update-thing game new-parent) ;; note this handles child removal from :thing-map
       )))
