@@ -20,11 +20,15 @@
   (or (:grammatical-person t) :third))
 
 (defn base-name [game thing]
-  (or (:proper-name thing)
-      (if-let [name-fn (:name-fn thing)]
-        (name-fn game thing))
-      (:name thing)
-      (error "object has no name!" thing))) 
+  (let [identified? (if-let [id-fn (:is-identified (:functions game))]
+                      (id-fn game thing)
+                      (:is-identified thing))] 
+    (or (and (not identified?) (:unidentified-name thing))
+        (:proper-name thing)
+        (if-let [name-fn (:name-fn thing)]
+          (name-fn game thing))
+        (:name thing)
+        (error "object has no name!" thing)))) 
 
 (defn plural? [thing]
   (if-let [num (:number thing)]

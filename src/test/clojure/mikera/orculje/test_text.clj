@@ -14,5 +14,12 @@
     (is (= "you hit a wall" (verb-phrase nil :the t "hit" :a t2))))
   )
 
+(deftest test-identified
+  (let [game (empty-game)
+        t1 (thing {:name "bob" :unidentified-name "??" :is-identified false})
+        t2 (thing {:name "bob" :unidentified-name "??" :is-identified true})]
+    (is (= "??" (base-name game t1)))
+    (is (= "bob" (base-name game t2)))))
+
 (deftest test-cap
   (is (= "You" (capitalise "you"))))
