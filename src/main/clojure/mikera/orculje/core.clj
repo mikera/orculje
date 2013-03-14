@@ -327,28 +327,33 @@
       (remove-thing-from-map game thing)
       (remove-thing-from-thing game loc thing))))
 
-(defn move-thing [^mikera.orculje.engine.Game game 
-                  ^mikera.orculje.engine.Thing thing 
-                  ^mikera.orculje.engine.Location loc]
-  (let [thing-map (:thing-map game)
-        things ^PersistentTreeGrid (:things game)
-        id (or (:id thing) (error "Thing has no ID!"))
-        thing (or (thing-map id) (error "Can't find thing! " id))
-        ^mikera.orculje.engine.Location cloc (or (:location thing) (error "Thing is not on map!"))
-        cx (.x cloc) cy (.y cloc) cz (.z cloc)
-        nx (.x loc) ny (.y loc) nz (.z loc)
-        thing-vec (.get things cx cy cz)
-        reduced-thing-vec (remove-from-vector thing thing-vec)
-        new-thing (-> (get-thing game thing)
-                    (assoc :location loc))
-        new-things (.set things cx cy cz reduced-thing-vec)
-        target-thing-vec (or (.get things nx ny nz) [])
-        increased-thing-vec (conj target-thing-vec new-thing)
-        new-things (.set new-things nx ny nz increased-thing-vec)]
-    (-> game
-      (assoc :things new-things)
-      (assoc :thing-map (assoc thing-map id new-thing))
-      (assoc :last-added-id id))))
+;(defn move-thing [^mikera.orculje.engine.Game game 
+;                  ^mikera.orculje.engine.Thing thing 
+;                  ^mikera.orculje.engine.Location loc]
+;  (let [thing-map (:thing-map game)
+;        things ^PersistentTreeGrid (:things game)
+;        id (or (:id thing) (error "Thing has no ID!"))
+;        thing (or (thing-map id) (error "Can't find thing! " id))
+;        ^mikera.orculje.engine.Location cloc (or (:location thing) (error "Thing is not on map!"))
+;        cx (.x cloc) cy (.y cloc) cz (.z cloc)
+;        nx (.x loc) ny (.y loc) nz (.z loc)
+;        thing-vec (.get things cx cy cz)
+;        reduced-thing-vec (remove-from-vector thing thing-vec)
+;        new-thing (-> (get-thing game thing)
+;                    (assoc :location loc))
+;        new-things (.set things cx cy cz reduced-thing-vec)
+;        target-thing-vec (or (.get things nx ny nz) [])
+;        increased-thing-vec (conj target-thing-vec new-thing)
+;        new-things (.set new-things nx ny nz increased-thing-vec)]
+;    (-> game
+;      (assoc :things new-things)
+;      (assoc :thing-map (assoc thing-map id new-thing))
+;      (assoc :last-added-id id))))
+
+(defn move-thing [game thing loc]
+  (as-> game game
+    (remove-thing game thing)
+    (add-thing game loc thing)))
 
 (defn update-thing
   "Updates a thing within the game. Thing must have valid ID and location
