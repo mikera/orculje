@@ -38,11 +38,50 @@
         game (add-thing game l t1)
         t1 (get-thing game (:last-added-id game)) 
         game (add-thing game t1 t2)
-        t1 (get-thing game t1)
+        _ (println game) 
+        _ (validate game)
+        t1 (get-thing game t1) ;; refresh t1 with correct children
         t2 (get-thing game (:last-added-id game)) ]
+    ;(println game)
+    ;(println (str (into {} t1)))
+    ;(println (str (into {} t2)))
+    (is (= l (:location t1)))
     (is (= :bar (:foo t1)))
     (is (= :baz (:foo t2)))
-    (is (= (:id t1) (:location t2)))))
+    (is (= (:id t1) (:location t2)))
+    (testing "contents"
+      (let [cts (contents t1)]
+        (is (vector? cts))
+        (is (== 1 (count cts)))
+        (is (= t2 (cts 0)))))
+    (is (validate game))
+    ))
+
+(deftest test-thing-update
+  (let [game (empty-game)
+        l (loc 1 2 3)
+        t1 (thing {:foo :bar})
+        game (add-thing game l t1)
+        t1 (get-thing game (:last-added-id game))
+        t1 (assoc t1 :updated true)
+        game (update-thing game t1) 
+        t1 (get-thing game t1)]
+    (is (:updated t1)) 
+    (is (validate game))
+    ))
+
+(deftest test-thing-merge
+  (let [game (empty-game)
+        l (loc 1 2 3)
+        t1 (thing {:foo :bar})
+        game (add-thing game l t1)
+        t1 (get-thing game (:last-added-id game))
+        game (merge-thing game t1 {:merged true}) 
+        t1 (get-thing game t1)]
+    (is (:merged t1)) 
+    (is (= l (:location t1))) 
+    (is (validate game))
+    ))
 
 (deftest test-thing-locations
   (let [game (empty-game)

@@ -11,7 +11,13 @@
 
 (declare get-thing)
 (declare update-thing)
+(declare merge-thing)
 
+(defmacro valid 
+  "Asserts that an expression is true, throws an error otherwise."
+  ([body & msgs]
+    `(or ~body
+       (error ~@msgs))))
 
 ;; =======================================================
 ;; location handling
@@ -95,6 +101,12 @@
         l
         (recur (:location (get-thing game l)))))))
 
+(defn contents 
+  ([thing]
+    (:things thing))
+  ([game thing]
+    (contents (get-thing game thing))))
+
 ;; =======================================================
 ;; Game subsystem
 
@@ -158,38 +170,46 @@
     ;; TODO: error if thing id already present
     (let [^PersistentTreeGrid cur-grid (:things game)
           id (or (:id thing) (new-id game))
-          thing-map (:thing-map game)
+          thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
           _ (when (thing-map id) (error "Thing already present!!"))
           new-thing (as-> thing thing
                       (assoc thing :id id)
                       (assoc thing :location loc))
           new-things (conj cur-things new-thing)]
-      (-> game
-        (assoc :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-        (assoc :thing-map (assoc thing-map id new-thing))
-        (assoc :last-added-id id)))))
+      (as-> game game
+        (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
+        (assoc game :thing-map (assoc thing-map id new-thing))
+        (assoc game :last-added-id id)))))
 
-(defn add-thing-to-thing [game parent thing]
+(defn add-thing-to-thing ^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game parent thing]
   (let [id (or (:id thing) (new-id game))
         thing-map (:thing-map game)
         _ (when (thing-map id) (error "Thing already present!!"))
-        parent (if (number? parent) (thing-map parent) parent)
-        parent-id (:id parent)
+        parent-id (if (number? parent) parent (or (:id parent) (error "no parent ID ?!?")))
+        parent (or (thing-map parent-id) (error "Parent [" parent-id "] not found!!"))
         new-thing (as-> thing thing
                         (assoc thing :id id)
                         (assoc thing :location parent-id))
-        parent (assoc parent :things (conj (or (:things parent) []) new-thing))]
-      (-> game
-        (update-thing parent) 
-        (assoc :thing-map (assoc thing-map id new-thing))
-        (assoc :last-added-id id))))
+        ;; parent (pd (assoc parent :things (conj (or (:things parent) []) new-thing)))
+        ]
+      (as-> game game
+        ;(do (println parent) game)
+        ;(update-thing game parent) 
+        (merge-thing game parent {:things (conj (or (:things parent) []) new-thing)})
+        (assoc game :thing-map (assoc (:thing-map game) id new-thing))
+        (assoc game :last-added-id id)
+        (do
+          (valid (:id parent))
+          (valid (:things (get-thing game parent)))
+          game))))
 
-(defn add-thing [game loc thing]
+(defn add-thing ^mikera.orculje.engine.Game [game loc thing]
   (if (instance? mikera.orculje.engine.Location loc)
     (add-thing-to-map game loc thing)
     (add-thing-to-thing game loc thing)))
 
 (defn remove-thing-from-map 
+  ^mikera.orculje.engine.Game
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Thing thing]
   (let [thing-map (:thing-map game)
@@ -249,13 +269,27 @@
       (assoc :last-added-id id))))
 
 (defn update-thing
-  "Updates a thing within the game. Warning: must not break validation rules" 
+  "Updates a thing within the game. Thing must have valid ID and location
+   Warning: must not break validation rules" 
   (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
-                                ^mikera.orculje.engine.Thing thing]
-    (let [loc (location game thing)]
+                                ^mikera.orculje.engine.Thing changed-thing]
+    (let [loc (or (:location (get-thing game changed-thing)) (error "thing has no locaation!"))]
+      ; (println (str "Updating: " (into {} changed-thing)))
       (as-> game game 
-          (remove-thing game thing)
-          (add-thing game loc thing)))))
+          (remove-thing game changed-thing)
+          ;(do (println game) game)
+          (add-thing game loc changed-thing)
+          ;(do (println game) game)          
+          ))))
+
+(defn merge-thing 
+  "Update a thing, merging in some new properties"
+  ([game thing props]
+  (let [thing (merge (get-thing game thing) props)
+        loc (or (:location thing) (error "thing has no locaation!"))]
+    (as-> game game
+      (remove-thing game thing)
+      (add-thing game loc thing)))))
 
 (defn get-pred 
   "Gets the first object satisfying a predicate in a square. Considers tile last."
@@ -275,6 +309,33 @@
         (find/find-first :is-blocking ts)
         (if (:is-blocking tl) tl nil))))) 
 
+
+;; ======================================================
+;; validation code
+
+
+(defn validate-game-thing [game thing]
+  (valid (:id thing))
+  (valid (or (nil? (:things thing)) (vector? (:things thing))))
+  (if-let [loc (:location thing)]
+    (if (loc? loc)
+      (let [^mikera.orculje.engine.Location loc loc]
+        (valid 
+          (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))))
+      (do 
+        (valid (number? loc))
+        (valid (loc? (location game thing)))))))
+
+(defn validate-game [game]
+  (valid (instance? mikera.orculje.engine.Game game))
+    (let [world (:world game)
+          things (:things game)
+          thing-map (:thing-map game)]
+      (valid world)
+      (valid things) 
+      (valid thing-map (str "No thing map!" game))
+      (valid (every? (partial validate-game-thing game) (vals thing-map)))))
+
 (defn validate [game]
-  "Validates a game"
-  (engine/validate-game game))
+  "Validates a game, throws an error for ay issue"
+  (validate-game game))

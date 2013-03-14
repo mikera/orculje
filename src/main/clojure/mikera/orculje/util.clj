@@ -5,6 +5,11 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
 
+(defmacro pd [exp]
+  `(let [exp# ~exp]
+     (println exp#)
+     exp#))
+
 (defn colour 
   ([^long argb]
     (Color. (bit-or (unchecked-int 0xFF000000) (unchecked-int argb)))))
