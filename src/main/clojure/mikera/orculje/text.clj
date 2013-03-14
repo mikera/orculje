@@ -20,7 +20,7 @@
   (or (:grammatical-person t) :third))
 
 (defn base-name [game thing]
-  (let [identified? (if-let [id-fn (:is-identified (:functions game))]
+  (let [identified? (if-let [id-fn (:is-identified? (:functions game))]
                       (id-fn game thing)
                       (:is-identified thing))] 
     (or (and (not identified?) (:unidentified-name thing))
