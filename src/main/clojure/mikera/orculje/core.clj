@@ -227,9 +227,24 @@
         (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
         (assoc game :last-added-id id)))))
 
+(defn add-child-modifiers [parent child pmods]
+  (let [child-id (or (:id child) (error "child has no ID! : " child))]
+    (reduce
+      (fn [parent mod]
+        (let [k (or (:key mod) (error "modifier has no :key " mod))
+              all-mods (:modifiers parent)
+              key-mods (k all-mods)
+              new-mod (assoc mod :source child-id)]
+          (assoc parent :modifiers (assoc all-mods k (cons key-mods new-mod)))))
+        parent
+        pmods)))
+
 (defn- add-child [parent child]
   (as-> parent parent
-    (assoc parent :things (conj (or (:things parent) []) child))))
+    (assoc parent :things (conj (or (:things parent) []) child))
+    (if-let [pmods (:parent-modifiers child)]
+      (add-child-modifiers parent child pmods)
+      parent)))
 
 (defn add-thing-to-thing ^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game parent thing]
   (let [id (or (:id thing) (new-id game))
