@@ -51,7 +51,7 @@
 ;; modifier definition
 ;;
 ;; usage: (modifier :SK (+ value (:ST thing) (:global-st-uplift (:globals game))))
-(defmacro modifier [property expr & {}]
+(defmacro modifier [property expr]
   `(let [key# ~property]
      {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
                 ~expr)
@@ -73,9 +73,11 @@
 
 (defn get-modified-value [game thing modifiers k unmodified-value]
   (if-let [mods (seq (k modifiers))]
-    (reduce (fn [v mod]
-              (let [mfn (:mod-fn mod)]
-                (mfn mod game thing k v))) unmodified-value mods)
+    (do 
+      ;; (println (str "modifying: " k " on " thing))
+      (reduce (fn [v mod]
+                (let [mfn (:mod-fn mod)]
+                  (mfn mod game thing k v))) unmodified-value mods))
     unmodified-value))
 
 (defmacro ? 
@@ -181,8 +183,10 @@
 
 (defn all-things 
   "Returns a sequence of all things in the game"
-  [game]
-  (vals (:thing-map game)))
+  ([game]
+    (vals (:thing-map game)))
+  ([game pred]
+    (filter pred (all-things game))))
 
 ;; =======================================================
 ;; Thing addition / removal / updates, heirarchy maintenance etc.
