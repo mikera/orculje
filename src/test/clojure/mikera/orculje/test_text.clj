@@ -14,6 +14,9 @@
     (is (= "you hit a wall" (verb-phrase nil :the t "hit" :a t2))))
   )
 
+(deftest test-and-string
+  (is (= "a, b and c" (and-string ["a" "b" "c"]))))
+
 (deftest test-identified
   (let [game (empty-game)
         t1 (thing {:name "bob" :unidentified-name "??" :is-identified false})

@@ -59,6 +59,15 @@
                "some ") 
              bname)))) 
 
+(defn and-string [ss]
+  (let [c (count ss)]
+    (cond 
+      (== c 1) (first ss)
+      (== c 2) (str (first ss) " and " (second ss))
+      :else (str
+              (apply str (map #(str % ", ") (take (- c 2) ss)))
+              (and-string (drop (- c 2) ss))))))
+
 (defn str-add [s a]
   (str 
     (if s (str s " "))
