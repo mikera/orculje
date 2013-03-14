@@ -208,6 +208,15 @@
     (add-thing-to-map game loc thing)
     (add-thing-to-thing game loc thing)))
 
+(defn- remove-thingmap-recursive 
+  "Remove from the :thing-map, a thing and all its children"
+  ([tm thing]
+    (let [id (if (number? thing) thing (or (:id thing) (error "Thing has no ID!!")))
+          thing (or (tm id) (error "Thing with id [" id "] not in thing-map"))
+          tm (dissoc tm id)
+          tm (reduce (fn [tm t] (remove-thingmap-recursive tm t)) tm (:things thing))]
+      tm)))
+
 (defn remove-thing-from-map 
   ^mikera.orculje.engine.Game
   [^mikera.orculje.engine.Game game 
@@ -220,9 +229,9 @@
         x (.x loc) y (.y loc) z (.z loc)
         thing-vec (.get things x y z)
         reduced-thing-vec (remove-from-vector thing thing-vec)]
-    (-> game
-      (assoc :things (.set things x y z reduced-thing-vec))
-      (assoc :thing-map (dissoc thing-map id)))))
+    (as-> game game
+      (assoc game :things (.set things x y z reduced-thing-vec))
+      (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id)))))
 
 (defn remove-thing-from-thing [game parent thing]
   (let [thing-map (:thing-map game)
@@ -233,9 +242,9 @@
         ci (find/find-index #(= (:id %) thing-id) children)
         new-children (vector-without children ci)
         new-parent (assoc parent :things new-children)]
-    (-> game
-      (update-thing new-parent)
-      (assoc :thing-map (dissoc thing-map thing-id)))))
+    (as-> game game
+      (update-thing game new-parent)
+      (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) thing-id)))))
 
 (defn remove-thing
   [game thing]

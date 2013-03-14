@@ -38,7 +38,7 @@
         game (add-thing game l t1)
         t1 (get-thing game (:last-added-id game)) 
         game (add-thing game t1 t2)
-        _ (println game) 
+        ;; _ (println game) 
         _ (validate game)
         t1 (get-thing game t1) ;; refresh t1 with correct children
         t2 (get-thing game (:last-added-id game)) ]
@@ -55,6 +55,12 @@
         (is (== 1 (count cts)))
         (is (= t2 (cts 0)))))
     (is (validate game))
+    (testing "remove it all!"
+      (let [game (remove-thing game t1)]
+        (println game)
+        (is (not (seq (all-things game))))
+        ;; (is (validate game))
+        ))
     ))
 
 (deftest test-thing-update
