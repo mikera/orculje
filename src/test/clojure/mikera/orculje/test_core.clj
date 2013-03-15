@@ -15,7 +15,8 @@
 (deftest test-game
   (testing "Game construction"
     (let [g (empty-game)]
-      (is (nil? (get-tile g 0 0 0))))))
+      (is (nil? (get-tile g 0 0 0)))
+      (is (nil? (get-thing g 1000))))))
 
 (deftest test-location
   (testing "Location building"
