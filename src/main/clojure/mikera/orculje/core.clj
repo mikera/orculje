@@ -330,11 +330,12 @@
 
 (defn remove-thing
   [game thing]
-  (let [thing (get-thing game thing)
-        loc (or (:location thing) (error "Thing is not present!"))]
-    (if (instance? mikera.orculje.engine.Location loc)
-      (remove-thing-from-map game thing)
-      (remove-thing-from-thing game loc thing))))
+  (if-let [thing (get-thing game thing)]
+    (let [loc (or (:location thing) (error "Thing is not present!"))]
+      (if (instance? mikera.orculje.engine.Location loc)
+        (remove-thing-from-map game thing)
+        (remove-thing-from-thing game loc thing)))
+    game))
 
 ;(defn move-thing [^mikera.orculje.engine.Game game 
 ;                  ^mikera.orculje.engine.Thing thing 

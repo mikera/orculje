@@ -16,7 +16,8 @@
   (testing "Game construction"
     (let [g (empty-game)]
       (is (nil? (get-tile g 0 0 0)))
-      (is (nil? (get-thing g 1000))))))
+      (is (nil? (get-thing g 1000)))
+      (is (identical? g (remove-thing g 2000))))))
 
 (deftest test-location
   (testing "Location building"
