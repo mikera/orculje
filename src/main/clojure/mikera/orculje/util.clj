@@ -11,8 +11,17 @@
      exp#))
 
 (defn long*
-  ([a b]
-    (long (+ 0.5 (* a b)))))
+  "Multiply and round to the nearest whole long value"
+  (^long [] 1)
+  (^long [a] (long (+ 0.5 a)))
+  (^long [a b]
+    (long (+ 0.5 (* a b))))
+  (^long [a b c]
+    (long (+ 0.5 (* a b c))))
+  (^long [a b c d]
+    (long (+ 0.5 (* a b c d))))
+  ([a b c d & more]
+    (long (+ 0.5 (reduce * (* a b c d) more)))))
 
 (defn colour 
   ([^long argb]
