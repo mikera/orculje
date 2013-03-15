@@ -125,6 +125,15 @@
         l
         (recur (:location (get-thing game l)))))))
 
+(defn parent 
+  "gets the parent of a thing"
+  ([game thing]
+    (let [thing (get-thing game thing)
+          l (:location thing)] 
+      (if (number? l) 
+        (get-thing game l)
+        nil))))
+
 (defn contents 
   ([thing]
     (:things thing))
