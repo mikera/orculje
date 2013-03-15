@@ -13,13 +13,12 @@
    :grammatical-person "Used to specify :first or :second (default is :third)"
    :name-fn "Function to calculate a name n the context of a game, called with (name-fn game thing)"})
 
-(def verb-lookup 
-  {})
+(def verb-lookup )
 
 (defn third-person-verb [vb]
   (if-let [irregular (verb-lookup vb)]
     (error "irregular verb not yet implemented")
-    (str vb "s"))) 
+    (str vb (if (= \s (last vb)) "es" "s")))) 
 
 (defn get-person [t]
   (or (:grammatical-person t) :third))
