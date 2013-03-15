@@ -57,14 +57,15 @@
     (is (= :bar (:foo t1)))
     (is (= :baz (:foo t2)))
     (is (= (:id t1) (:location t2)))
+    (is (= t1 (parent game t2)))
     ;; (println t1)
     (is (? t1 :modified-by-child))
+    (is (validate game))
     (testing "contents"
       (let [cts (contents t1)]
         (is (vector? cts))
         (is (== 1 (count cts)))
         (is (= t2 (cts 0)))))
-    (is (validate game))
     (testing "remove it all!"
       (let [game (remove-thing game t1)]
         ;;(println game)
