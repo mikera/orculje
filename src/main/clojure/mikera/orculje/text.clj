@@ -60,7 +60,7 @@
     (or (:proper-name thing)
         (if-let [person (:grammatical-person thing)]
           bname) 
-        (str (if (singular? thing)
+        (str (if (and (singular? thing) (not (:is-quantity thing)))
                (if (starts-with-vowel? bname) "an " "a ")
                "some ") 
              bname)))) 
