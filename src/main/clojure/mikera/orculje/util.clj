@@ -10,6 +10,10 @@
      (println exp#)
      exp#))
 
+(defn long*
+  ([a b]
+    (long (+ 0.5 (* a b)))))
+
 (defn colour 
   ([^long argb]
     (Color. (bit-or (unchecked-int 0xFF000000) (unchecked-int argb)))))
