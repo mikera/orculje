@@ -122,7 +122,7 @@
   (^mikera.orculje.engine.Location [game thing]
     (cond 
       (thing? thing)
-        (loop [l (:location (get-thing game thing))]
+        (loop [l (or (:location (get-thing game thing)) "Thing has no location!")]
           (if (instance? mikera.orculje.engine.Location l)
             l
             (recur (:location (get-thing game l)))))
