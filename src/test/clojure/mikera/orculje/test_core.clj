@@ -31,7 +31,10 @@
     (is (= (loc 1 2 3) (loc [1 2 3])))
     (is (not (= (loc 1 2 3) (loc 1 2 4)))))
   (testing "Location direction"
-    (is (= (loc 1 0 -1) (direction (loc 10 5 10) (loc 15 5 5))))))
+    (is (= (loc 1 0 -1) (direction (loc 10 5 10) (loc 15 5 5)))))
+  (let [lmin (loc 2 2 2) lmax (loc 5 5 5)]
+    (is (= (loc 2 4 5) (loc-bound lmin lmax (loc 1 4 7))))
+    (is (loc-within? lmin lmax (rand-loc lmin lmax)))))
 
 (deftest test-modifier
   (let [game (empty-game)

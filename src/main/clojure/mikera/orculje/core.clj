@@ -29,6 +29,24 @@
          (>= (.y a) (.y lmin)) (<= (.y a) (.y lmax))
          (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
 
+(defn loc-bound 
+  ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
+    ^mikera.orculje.engine.Location a]
+    (engine/->Location (max (.x lmin) (min (.x a) (.x lmax)))
+                       (max (.y lmin) (min (.y a) (.y lmax)))
+                       (max (.z lmin) (min (.z a) (.z lmax))))))
+
+(defn rand-loc [^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax]
+  (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
+                                (Rand/range (lmin 1) (lmax 1))
+                                (Rand/range (lmin 2) (lmax 2)))]
+    cloc))
+
+(defn loc-dist-manhattan [^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+  (long (+ (Math/abs (- (.x a) (.x b)))
+           (Math/abs (- (.y a) (.y b)))
+           (Math/abs (- (.z a) (.z b))))))
+
 (defn loc 
   "Constructs a new Location"
   ([xs]
