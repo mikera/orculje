@@ -41,6 +41,12 @@
                                    (int (Maths/sign (- (.y to-loc) (.y from-loc))))
                                    (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
 
+(defn location-towards 
+  "Gets a location one square closer to the target location"
+  (^mikera.orculje.engine.Location [^mikera.orculje.engine.Location from-loc 
+                                   ^mikera.orculje.engine.Location to-loc]
+    (loc-add from-loc (direction from-loc to-loc))))
+
 ;; =======================================================
 ;; modifier definition
 ;;
