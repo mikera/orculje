@@ -116,6 +116,14 @@
           ts (get-things game l)
           nt (first ts)
           new-id (:id nt)]
+      (testing "finder"
+        (is (not (find-things game :id (loc 0 0 0) (loc 1 1 1))))
+        (is (= nt (first (find-things game :id (loc 0 0 0) (loc 3 3 3)))))
+        (is (= nt (find-nearest-thing game :id (loc 0 0 3) 10)))
+        (is (not (find-nearest-thing game :id (loc 0 0 0) 0)))
+        (is (not (find-nearest-thing game :id (loc 0 0 0) 10))) ;; not on same z-plane
+        )
+      
       (testing "adding to map" 
         (is (= 1 (count ts)))
 	      (is (vector? ts))

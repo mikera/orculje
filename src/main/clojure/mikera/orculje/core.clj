@@ -419,23 +419,26 @@
 
 (defn find-nearest-thing
   [^mikera.orculje.engine.Game game pred ^mikera.orculje.engine.Location loc-or-thing range]
-  (let [^mikera.orculje.engine.Location loc-or-thing (location game loc-or-thing)
-        ^mikera.orculje.engine.Location loc2 (loc-add loc-or-thing (loc range range 0))
-        ^mikera.orculje.engine.Location loc1 (loc-add loc-or-thing (loc (- range) (- range) 0))
+  (let [^mikera.orculje.engine.Location cloc (location game loc-or-thing)
+        ^mikera.orculje.engine.Location loc1 (loc-add cloc (loc (- range) (- range) 0))
+        ^mikera.orculje.engine.Location loc2 (loc-add cloc (loc range range 0))
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
         x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
         ^PersistentTreeGrid thing-grid (:things game)
         best-distance-squared (atom Long/MAX_VALUE)
         best-thing (atom nil)
-        find-fn (fn [x y z v]
-                  (if (and v (pred v))
-                    (let [dx (- (long x) (.x loc))
-                         dy (- (long y) (.y loc))
-                         dz (- (long z) (.z loc))
-                         dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
-                      (when (< dist2 @best-distance-squared)
-                        (reset! best-distance-squared dist2)
-                        (reset! best-thing v)))))
+        find-fn (fn [x y z vs]
+                  ;;(println (str "checking things at " (loc x y z)))
+                  (dovec [v vs]
+                    (if (pred v)
+                      (let [dx (- (long x) (.x cloc))
+                            dy (- (long y) (.y cloc))
+                            dz (- (long z) (.z cloc))
+                            dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
+                        ;;(println (str "found" v " at " (loc x y z)))
+                        (when (< dist2 @best-distance-squared)
+                          (reset! best-distance-squared dist2)
+                          (reset! best-thing v))))))
         ^Finder finder (Finder. find-fn)]
     (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
     @best-thing))
@@ -444,15 +447,23 @@
   [^mikera.orculje.engine.Game game pred loc-or-thing loc2-or-range]
   (let [^mikera.orculje.engine.Location loc1 (location game loc-or-thing)
         use-range? (number? loc2-or-range)
-        ^mikera.orculje.engine.Location loc2 (if use-range? (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) loc2-or-range)
-        ^mikera.orculje.engine.Location loc1 (if use-range? (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0) loc1))
+        ^mikera.orculje.engine.Location loc2 (if use-range? 
+                                               (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) 
+                                               loc2-or-range)
+        ^mikera.orculje.engine.Location loc1 (if use-range? 
+                                               (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0))
+                                               loc1)
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
         x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
         ^PersistentTreeGrid thing-grid (:things game)
         found-things (atom nil)
-        find-fn (fn [x y z v]
-                  (if (and v (pred v))
-                    (reset! found-things (cons v @found-things))))
+        find-fn (fn [x y z vs]
+                  ;; (println (str x "," y "," z vs))
+                  (dovec [v vs]
+                    ;;(println (str x "," y "," z " = " (str v)))
+                    (when (pred v)
+                      ;;(println "found!!")
+                      (reset! found-things (cons v @found-things)))))
         ^Finder finder (Finder. find-fn)]
     (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
     @found-things))
