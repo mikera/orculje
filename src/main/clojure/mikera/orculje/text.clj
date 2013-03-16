@@ -100,6 +100,7 @@
               :definite :false}
      s nil
      ts (seq terms)]
+    (valid (game? game) "First parameter must be a game!")
     (if ts
       (let [t (first ts)]
         (cond 
@@ -119,12 +120,14 @@
                          (a-name game t)))
               (next ts))
           (associative? t) 
-            (recur (merge context t) s (next ts)) 
+            (do ;; (println (str "merge:" t)) 
+              (recur (merge context t) s (next ts))) 
           (string? t)
             (recur
               context
               (str-add s
-                       (person-verb t (:person context)))
+                       (do ;;(println context)
+                         (person-verb t (:person context))))
               (next ts))
           :else
             (error "unregognised term in phrase: " t)))
