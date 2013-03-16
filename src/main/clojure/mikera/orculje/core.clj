@@ -120,10 +120,16 @@
 (defn location 
   "Gets the location of a thing."
   (^mikera.orculje.engine.Location [game thing]
-    (loop [l (:location (get-thing game thing))]
-      (if (instance? mikera.orculje.engine.Location l)
-        l
-        (recur (:location (get-thing game l)))))))
+    (cond 
+      (thing? thing)
+        (loop [l (:location (get-thing game thing))]
+          (if (instance? mikera.orculje.engine.Location l)
+            l
+            (recur (:location (get-thing game l)))))
+      (loc? thing)
+        thing
+      :else 
+        (loc thing))))
 
 (defn parent 
   "gets the parent of a thing"

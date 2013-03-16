@@ -8,10 +8,11 @@
   (is (not (starts-with-vowel? "pumpkin"))))
 
 (deftest test-you
-  (let [t (thing {:grammatical-person :second
+  (let [game (empty-game)
+        t (thing {:grammatical-person :second
            :name "you"})
         t2 (thing {:name "wall"})]
-    (is (= "you hit a wall" (verb-phrase nil :the t "hit" :a t2))))
+    (is (= "you hit a wall" (verb-phrase game :the t "hit" :a t2))))
   )
 
 (deftest test-and-string
