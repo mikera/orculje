@@ -17,10 +17,20 @@
   {"is" {:second-person "are"
          :third-person "is"}})
 
+(defn pronoun [thing]
+  (cond
+    (= :second (:grammatical-person thing)) "you"
+    :else "it"))
+
 (defn third-person-verb [vb]
   (if-let [irregular (verb-lookup vb)]
     (error "irregular verb not yet implemented")
     (str vb (if (= \s (last vb)) "es" "s")))) 
+
+(defn person-verb [vb person]
+  (cond 
+    (= :third person) (third-person-verb vb)
+    :else vb))
 
 (defn get-person [t]
   (or (:grammatical-person t) :third))
@@ -108,13 +118,13 @@
                          (the-name game t)
                          (a-name game t)))
               (next ts))
+          (associative? t) 
+            (recur (merge context t) s (next ts)) 
           (string? t)
             (recur
               context
               (str-add s
-                       (if (= :third (:person context))
-                         (third-person-verb t)
-                         t))
+                       (person-verb t (:person context)))
               (next ts))
           :else
             (error "unregognised term in phrase: " t)))
