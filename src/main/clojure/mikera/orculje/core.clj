@@ -22,6 +22,13 @@
   ([loc]
     (instance? mikera.orculje.engine.Location loc)))
 
+(defn loc-within? 
+  ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
+    ^mikera.orculje.engine.Location a]
+    (and (>= (.x a) (.x lmin)) (<= (.x a) (.x lmax))
+         (>= (.y a) (.y lmin)) (<= (.y a) (.y lmax))
+         (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
+
 (defn loc 
   "Constructs a new Location"
   ([xs]
@@ -34,6 +41,24 @@
     (engine/->Location (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
   ([^mikera.orculje.engine.Location a ^long x ^long y ^long z]
     (engine/->Location (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
+
+
+(defn loc-inc 
+  ([^mikera.orculje.engine.Location a]
+    (engine/->Location (inc (.x a)) (inc (.y a)) (inc (.z a)))))
+
+
+(defn loc-dec 
+  ([^mikera.orculje.engine.Location a]
+    (engine/->Location (dec (.x a)) (dec (.y a)) (dec (.z a)))))
+
+(defn loc-min 
+  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+    (engine/->Location (min (.x a) (.x b)) (min (.y a) (.y b)) (min (.z a) (.z b)))))
+
+(defn loc-max 
+  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+    (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
   ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location from-loc 
