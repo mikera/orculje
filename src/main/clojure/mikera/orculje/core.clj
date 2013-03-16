@@ -13,12 +13,6 @@
 (declare update-thing)
 (declare merge-thing)
 
-(defmacro valid 
-  "Asserts that an expression is true, throws an error otherwise."
-  ([body & msgs]
-    `(or ~body
-       (error ~@msgs))))
-
 ;; =======================================================
 ;; location handling
 
@@ -311,7 +305,7 @@
              (reduce 
                (fn [pmods [k mods]]
                  (assoc pmods k
-                        (doall (filter filt mods))))
+                        (doall (find/eager-filter filt mods))))
                pmods
                pmods)))
     parent))
