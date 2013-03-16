@@ -311,7 +311,7 @@
              (reduce 
                (fn [pmods [k mods]]
                  (assoc pmods k
-                        (filter filt mods)))
+                        (doall (filter filt mods))))
                pmods
                pmods)))
     parent))
