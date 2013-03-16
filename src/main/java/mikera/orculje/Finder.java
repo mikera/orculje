@@ -3,7 +3,7 @@ package mikera.orculje;
 import clojure.lang.IFn;
 import mikera.engine.BlockVisitor;
 
-public class Finder extends BlockVisitor<Boolean> {
+public class Finder extends BlockVisitor<Object> {
 	
 	private IFn callback;
 
@@ -13,7 +13,7 @@ public class Finder extends BlockVisitor<Boolean> {
 	
 	@Override
 	public Object visit(int x1, int y1, int z1, int x2, int y2, int z2,
-			Boolean value) {
+			Object value) {
 		callback.invoke(x1,y1,z1,value);
 		return null;
 	}

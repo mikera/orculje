@@ -418,9 +418,10 @@
 ;; finder functions
 
 (defn find-nearest-thing
-  [^mikera.orculje.engine.Game game pred ^mikera.orculje.engine.Location loc range]
-  (let [^mikera.orculje.engine.Location loc2 (loc-add loc (loc range range 0))
-        ^mikera.orculje.engine.Location loc1 (loc-add loc (loc (- range) (- range) 0))
+  [^mikera.orculje.engine.Game game pred ^mikera.orculje.engine.Location loc-or-thing range]
+  (let [^mikera.orculje.engine.Location loc-or-thing (location game loc-or-thing)
+        ^mikera.orculje.engine.Location loc2 (loc-add loc-or-thing (loc range range 0))
+        ^mikera.orculje.engine.Location loc1 (loc-add loc-or-thing (loc (- range) (- range) 0))
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
         x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
         ^PersistentTreeGrid thing-grid (:things game)
@@ -440,8 +441,9 @@
     @best-thing))
 
 (defn find-things
-  [^mikera.orculje.engine.Game game pred loc1 loc2-or-range]
-  (let [use-range? (number? loc2-or-range)
+  [^mikera.orculje.engine.Game game pred loc-or-thing loc2-or-range]
+  (let [^mikera.orculje.engine.Location loc1 (location game loc-or-thing)
+        use-range? (number? loc2-or-range)
         ^mikera.orculje.engine.Location loc2 (if use-range? (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) loc2-or-range)
         ^mikera.orculje.engine.Location loc1 (if use-range? (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0) loc1))
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
