@@ -201,7 +201,7 @@
   ([game]
     (vals (:thing-map game)))
   ([game pred]
-    (filter pred (all-things game))))
+    (find/eager-filter pred (all-things game))))
 
 ;; =======================================================
 ;; Thing addition / removal / updates, heirarchy maintenance etc.
