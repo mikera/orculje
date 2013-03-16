@@ -3,6 +3,7 @@
   (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand Maths])
+  (:import [mikera.orculje Finder])
   (:require [mikera.orculje.engine :as engine])
   (:require [mikera.cljutils.find :as find]))
 
@@ -412,6 +413,48 @@
       (or 
         (find/find-first :is-blocking ts)
         (if (:is-blocking tl) tl nil))))) 
+
+;; =====================================================
+;; finder functions
+
+(defn find-nearest-thing
+  [^mikera.orculje.engine.Game game pred ^mikera.orculje.engine.Location loc range]
+  (let [^mikera.orculje.engine.Location loc2 (loc-add loc (loc range range 0))
+        ^mikera.orculje.engine.Location loc1 (loc-add loc (loc (- range) (- range) 0))
+        x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
+        x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
+        ^PersistentTreeGrid thing-grid (:things game)
+        best-distance-squared (atom Long/MAX_VALUE)
+        best-thing (atom nil)
+        find-fn (fn [x y z v]
+                  (if (and v (pred v))
+                    (let [dx (- (long x) (.x loc))
+                         dy (- (long y) (.y loc))
+                         dz (- (long z) (.z loc))
+                         dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
+                      (when (< dist2 @best-distance-squared)
+                        (reset! best-distance-squared dist2)
+                        (reset! best-thing v)))))
+        ^Finder finder (Finder. find-fn)]
+    (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
+    @best-thing))
+
+(defn find-things
+  [^mikera.orculje.engine.Game game pred loc1 loc2-or-range]
+  (let [use-range? (number? loc2-or-range)
+        ^mikera.orculje.engine.Location loc2 (if use-range? (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) loc2-or-range)
+        ^mikera.orculje.engine.Location loc1 (if use-range? (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0) loc1))
+        x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
+        x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
+        ^PersistentTreeGrid thing-grid (:things game)
+        found-things (atom nil)
+        find-fn (fn [x y z v]
+                  (if (and v (pred v))
+                    (reset! found-things (cons v @found-things))))
+        ^Finder finder (Finder. find-fn)]
+    (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
+    @found-things))
+
 
 
 ;; ======================================================
