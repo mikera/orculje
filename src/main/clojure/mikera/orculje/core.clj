@@ -108,10 +108,11 @@
 (defn thing 
   "Constructs a new thing with the given properties."
   ([props]
-  (engine/map->Thing props)))
+    (let [props (or props (error "Can't construct a thing with no properties!"))] 
+      (engine/map->Thing props))))
 
 (defn thing? 
-  "Returns tru if t is a Thing" 
+  "Returns true if t is a Thing" 
   ([t]
     (instance? mikera.orculje.engine.Thing t)))
 
@@ -330,6 +331,7 @@
           game))))
 
 (defn add-thing ^mikera.orculje.engine.Game [game loc thing]
+  (or thing (error "Can't add a nil thing!!"))
   (if (instance? mikera.orculje.engine.Location loc)
     (add-thing-to-map game loc thing)
     (add-thing-to-thing game loc thing)))
