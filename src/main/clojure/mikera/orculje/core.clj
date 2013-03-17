@@ -165,6 +165,8 @@
   "Gets the location of a thing."
   (^mikera.orculje.engine.Location [game thing]
     (cond 
+      (number? thing)
+        (location game (get-thing game thing))
       (thing? thing)
         (loop [l (or (:location (get-thing game thing)) "Thing has no location!")]
           (if (instance? mikera.orculje.engine.Location l)
@@ -455,7 +457,7 @@
           tl (get-tile game loc)]
       (or 
         (find/find-first :is-blocking ts)
-        (if (:is-blocking tl) tl nil))))) 
+        (if (and tl (:is-blocking tl)) tl nil))))) 
 
 ;; =====================================================
 ;; finder functions
