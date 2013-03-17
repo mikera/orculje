@@ -23,6 +23,14 @@
 
 (def PLACE_RETRIES 20)
 
+(defn find-loc [lmin lmax loc-pred]
+  (loop [i PLACE_RETRIES]
+    (let [l (rand-loc lmin lmax)]
+      (when (> i 0)
+        (if (loc-pred l)
+          l
+          (recur (dec i)))))))
+
 (defn place-thing
   "Places a thing randomly within the given area. Returns nil if thing cannot be placed"
   [game 
