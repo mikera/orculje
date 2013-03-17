@@ -37,6 +37,10 @@
         -1
         (if (identical? item (.nth vector i)) i (recur (inc i)))))))
 
+(defn name-pred [^String name]
+  (fn [thing]
+    (.equals name (if (string? thing) thing (:name thing)))))
+
 (defn vector-without
   "Cuts a specific position of a vector"
   [^clojure.lang.PersistentVector vector ^long i]

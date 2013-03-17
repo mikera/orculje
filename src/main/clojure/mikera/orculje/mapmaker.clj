@@ -26,10 +26,12 @@
 (defn place-thing
   "Places a thing randomly within the given area. Returns nil if thing cannot be placed"
   [game 
-   ^mikera.orculje.engine.Location lower 
-   ^mikera.orculje.engine.Location upper 
+   ^mikera.orculje.engine.Location la 
+   ^mikera.orculje.engine.Location lb 
    t]
-  (let [^mikera.engine.PersistentTreeGrid grid (:world game)
+  (let [^mikera.orculje.engine.Location lower (loc-min la lb)
+        ^mikera.orculje.engine.Location upper (loc-max la lb)
+        ^mikera.engine.PersistentTreeGrid grid (:world game)
           x1 (min (.x lower) (.x upper))
           x2 (max (.x lower) (.x upper))
           y1 (min (.y lower) (.y upper))
