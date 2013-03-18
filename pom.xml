@@ -43,11 +43,15 @@
 	<repositories>
 		<repository>
 			<id>clojars.org</id>
-			<url>http://clojars.org/repo</url>
+			<name>Clojars repository</name>
+			<url>https://clojars.org/repo</url>
 		</repository>
 	</repositories>
 
-  <scm>
-    <tag>orculje-0.0.1</tag>
-  </scm>
+	<scm>
+		<connection>scm:git:git@github.com:mikera/${project.artifactId}.git</connection>
+		<url>scm:git:git@github.com:mikera/${project.artifactId}.git</url>
+		<developerConnection>scm:git:git@github.com:mikera/${project.artifactId}.git</developerConnection>
+		<tag>orculje-0.0.1</tag>
+	</scm>
 </project>
