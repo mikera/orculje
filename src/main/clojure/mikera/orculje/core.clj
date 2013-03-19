@@ -493,7 +493,7 @@
   ([a b]
     (and (= (:name a) (:name b))
          (= (:contents a) (:contents b))
-         (map-equals-except #{:id :location} a b))))
+         (map-equals-except #{:id :location :number} a b))))
 
 (defn stack-thing 
   "Stacks the object source into the object dest, according to the :stack-fn function.
