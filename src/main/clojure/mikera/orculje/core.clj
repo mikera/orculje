@@ -484,9 +484,9 @@
   "Stacks the object source into the object dest, according to the :stack-fn function.
    Source is assumed to have been removed from the map."
   ([game source dest]
-    (let [stack-fn (or (:stack-fn source) (fn [a b] (assoc b (+ (get-number a) (get-number b)))))]
+    (let [stack-fn (or (:stack-fn source) (fn [a b] (assoc b :number (+ (get-number a) (get-number b)))))]
       (as-> game game
-            (update-thing game dest (stack-fn source dest))))))
+            (update-thing game (stack-fn source dest))))))
 
 (defn merge-thing 
   "Update a thing, merging in some new properties"

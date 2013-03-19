@@ -114,6 +114,17 @@
     (is (validate game))
     ))
 
+(deftest test-thing-map-stacking
+  (let [game (empty-game)
+        l (loc 1 2 3)
+        t (thing {:number 2 :foo :bar :can-stack? default-can-stack?})
+        game (add-thing game l t)
+        game (add-thing game l t) 
+        ts (get-things game l)
+        t1 (first ts)]
+    (is (= 4 (:number t1))) 
+    (is (= 1 (count ts)))))
+
 (deftest test-thing-locations
   (let [game (empty-game)
           l (loc 1 2 3)
