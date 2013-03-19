@@ -10,7 +10,7 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
 
-(def ^Font font (Fonts. "Courier New" Font/PLAIN 16))
+(def ^Font font (Font. "Courier New" Font/PLAIN 16))
 
 (defn new-frame 
   (^JFrame []

@@ -20,7 +20,9 @@
   {:id {:desc "Long ID of a thing. Must exist whenever a thing is present in a Game"}
    :location {:desc "Defines the location of a thing. Can be a Long ID or Location"}
    :modifiers {:desc "Defines the current modifiers active on a thing."}
-   :number {:desc "Defined the number of things in a stack"}})
+   :number {:desc "Defined the number of things in a stack"}
+   :can-stack? {:desc "A (fn [a b]...) that returns true if a can stack with b"}
+   :stack-fn {:desc "A (fn [a b]...) that returns a combined stack of a and b"}})
 
 ;; =======================================================
 ;; location handling
@@ -200,6 +202,9 @@
     (:things thing))
   ([game thing]
     (contents (get-thing game thing))))
+
+(defn get-number [thing]
+  (or (:number thing) 1))
 
 ;; =======================================================
 ;; Game subsystem
@@ -452,6 +457,14 @@
           (add-thing game loc changed-thing)
           ;(do (println game) game)          
           ))))
+
+(defn stack-thing 
+  "Stacks the object source into the object dest, according to the :stack-fn function.
+   Source is assumed to have been removed from the map."
+  ([game source dest]
+    (let [stack-fn (or (:stack-fn source) (fn [a b] (assoc b (+ (get-number a) (get-number b)))))]
+      (as-> game game
+            (update-thing game dest (stack-fn source dest))))))
 
 (defn merge-thing 
   "Update a thing, merging in some new properties"
