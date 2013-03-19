@@ -123,7 +123,8 @@
         ts (get-things game l)
         t1 (first ts)]
     (is (= 4 (:number t1))) 
-    (is (= 1 (count ts)))))
+    (is (= 1 (count ts)))
+    (is (validate game))))
 
 (deftest test-thing-locations
   (let [game (empty-game)

@@ -305,7 +305,9 @@
       (let [sc #(can-stack? ob %)
             stack-target (find/find-first sc potential-stack-vector)]
         (if stack-target
-          (stack-thing game ob stack-target))))))
+          (as-> game game
+                (stack-thing game ob stack-target)
+                (assoc game :last-added-id (:id stack-target))))))))
 
 (defn add-thing-to-map
   [^mikera.orculje.engine.Game game 
