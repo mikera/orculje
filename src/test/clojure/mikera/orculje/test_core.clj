@@ -140,7 +140,11 @@
     (is (= 1 (count inv))) 
     (is (= t2 (inv 0)))
     (is (= 4 (:number t2)))
-    (is (validate game))))
+    (is (validate game))
+    (testing "removal"
+       (let [game (remove-thing game t2 1)
+             t2 (get-thing game t2)])      
+         (is (== 3 (get-number t2))))))
 
 (deftest test-thing-locations
   (let [game (empty-game)

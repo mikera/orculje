@@ -427,13 +427,23 @@
       )))
 
 (defn remove-thing
-  [game thing]
-  (if-let [thing (get-thing game thing)]
-    (let [loc (or (:location thing) (error "Thing is not present!"))]
-      (if (instance? mikera.orculje.engine.Location loc)
-        (remove-thing-from-map game thing)
-        (remove-thing-from-thing game loc thing)))
-    game))
+  ([game thing]
+    (if-let [thing (get-thing game thing)]
+      (let [loc (or (:location thing) (error "Thing is not present!"))]
+        (if (instance? mikera.orculje.engine.Location loc)
+          (remove-thing-from-map game thing)
+          (remove-thing-from-thing game loc thing)))
+      game))
+  ([game thing number]
+    (let [thing (get-thing game thing)
+          num (get-number thing)]
+      (cond 
+        (== num number)
+          (remove-thing game thing)
+        (> num number)
+          (update-thing game (assoc thing (- num number)))
+        :else 
+          (error "Trying to remove more things [" number "] than exist [" num "]")))))
 
 ;(defn move-thing [^mikera.orculje.engine.Game game 
 ;                  ^mikera.orculje.engine.Thing thing 
