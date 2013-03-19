@@ -92,9 +92,14 @@
 (defn the-name 
   "Returns the name of a thing with a definite article (the)"
   ([game thing]
-    (or (:proper-name thing)
-        (if-let [person (:grammatical-person thing)]
-          (base-name game thing)) 
+    (cond 
+      (:proper-name thing)
+        (:proper-name thing)
+      (if-let [person (:grammatical-person thing)] (= person :second))
+        (base-name game thing)
+      (:is-quantity thing) 
+        (str "the " (base-name game thing))
+      :else 
         (str "the " (num-name game thing))))) 
 
 (defn a-name 
@@ -104,7 +109,7 @@
       (:proper-name thing) 
         (:proper-name thing)
       (:is-quantity thing) 
-        (base-name game thing) 
+        (str "some " (base-name game thing)) 
       (plural? thing) 
         (str (:number thing) " " (plural-name game thing))
       :else 
