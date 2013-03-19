@@ -355,21 +355,24 @@
         _ (when (thing-map id) (error "Thing already present!!"))
         parent-id (if (number? parent) parent (or (:id parent) (error "no parent ID ?!?")))
         parent (or (thing-map parent-id) (error "Parent [" parent-id "] not found!!"))
-        new-thing (as-> thing thing
-                        (assoc thing :id id)
-                        (assoc thing :location parent-id))
+        pcontents (:things parent)
         ;; parent (pd (assoc parent :things (conj (or (:things parent) []) new-thing)))
         ]
-      (as-> game game
-        ;(do (println parent) game)
-        ;(update-thing game parent) 
-        (update-thing game (add-child parent new-thing))
-        (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
-        (assoc game :last-added-id id)
-        (do
-          (valid (:id parent))
-          (valid (:things (get-thing game parent)))
-          game))))
+      (or
+        (try-stack game thing pcontents)
+        (let [new-thing (as-> thing thing
+                        (assoc thing :id id)
+                        (assoc thing :location parent-id))]
+          (as-> game game
+              ;(do (println parent) game)
+              ;(update-thing game parent) 
+              (update-thing game (add-child parent new-thing))
+              (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
+              (assoc game :last-added-id id)
+              (do
+                (valid (:id parent))
+                (valid (:things (get-thing game parent)))
+                game))))))
 
 (defn add-thing ^mikera.orculje.engine.Game [game loc thing]
   (or thing (error "Can't add a nil thing!!"))
