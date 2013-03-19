@@ -251,6 +251,17 @@
     (find/eager-filter pred (all-things game))))
 
 ;; =======================================================
+;; query features
+
+(defn is-identified? 
+  "Returns true if an object has been identified."
+  ([game thing]
+    (boolean 
+      (or (:is-identified thing) 
+          (if-let [id-fn (:is-identified? (:functions game))]
+            (id-fn game thing))))))
+
+;; =======================================================
 ;; Thing addition / removal / updates, heirarchy maintenance etc.
 
 (defn- remove-thingmap-recursive 
