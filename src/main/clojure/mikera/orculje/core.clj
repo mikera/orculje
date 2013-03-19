@@ -15,6 +15,14 @@
 (declare merge-thing)
 
 ;; =======================================================
+;; special properties
+(def SPECIAL-PROPERTIES 
+  {:id {:desc "Long ID of a thing. Must exist whenever a thing is present in a Game"}
+   :location {:desc "Defines the location of a thing. Can be a Long ID or Location"}
+   :modifiers {:desc "Defines the current modifiers active on a thing."}
+   :number {:desc "Defined the number of things in a stack"}})
+
+;; =======================================================
 ;; location handling
 
 (defn loc? 
