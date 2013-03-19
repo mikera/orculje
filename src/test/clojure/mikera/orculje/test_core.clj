@@ -126,6 +126,22 @@
     (is (= 1 (count ts)))
     (is (validate game))))
 
+(deftest test-thing-inv-stacking
+  (let [game (empty-game)
+        l (loc 1 2 3)
+        t (thing {:number 2 :foo :bar :can-stack? default-can-stack?})
+        game (add-thing game l t)
+        t1 (get-thing game (:last-added-id game))
+        game (add-thing game t1 t)
+        game (add-thing game t1 t)
+        t1 (get-thing game t1)
+        t2 (get-thing game (:last-added-id game))
+        inv (contents t1)]
+    (is (= 1 (count inv))) 
+    (is (= t2 (inv 0)))
+    (is (= 4 (:number t2)))
+    (is (validate game))))
+
 (deftest test-thing-locations
   (let [game (empty-game)
           l (loc 1 2 3)
