@@ -13,6 +13,7 @@
 (declare get-thing)
 (declare update-thing)
 (declare merge-thing)
+(declare stack-thing)
 
 ;; =======================================================
 ;; special properties
@@ -295,24 +296,37 @@
           tm (reduce (fn [tm t] (add-thingmap-recursive tm t)) tm (:things thing))]
       tm)))
 
+(defn try-stack 
+  "Attempts to stack an object in a terget vector of things. 
+   Either a) completes the stacking operation and returns updated game
+          b) returns nil is stacking is not possible"
+  ([game ob potential-stack-vector]
+    (if-let [can-stack? (:can-stack? ob)]
+      (let [sc #(can-stack? ob %)
+            stack-target (find/find-first sc potential-stack-vector)]
+        (if stack-target
+          (stack-thing game ob stack-target))))))
+
 (defn add-thing-to-map
   [^mikera.orculje.engine.Game game 
    ^mikera.orculje.engine.Location loc 
    ^mikera.orculje.engine.Thing thing]
   (let [cur-things (or (get-things game loc) [])]
     ;; TODO: error if thing id already present
-    (let [^PersistentTreeGrid cur-grid (:things game)
-          id (or (:id thing) (new-id game))
-          thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
-          _ (when (thing-map id) (error "Thing already present!!"))
-          new-thing (as-> thing thing
-                      (assoc thing :id id)
-                      (assoc thing :location loc))
-          new-things (conj cur-things new-thing)]
-      (as-> game game
-        (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-        (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
-        (assoc game :last-added-id id)))))
+    (or
+      (try-stack game thing cur-things)
+      (let [^PersistentTreeGrid cur-grid (:things game)
+            id (or (:id thing) (new-id game))
+            thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
+            _ (when (thing-map id) (error "Thing already present!!"))
+            new-thing (as-> thing thing
+                            (assoc thing :id id)
+                            (assoc thing :location loc))
+            new-things (conj cur-things new-thing)]
+        (as-> game game
+              (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
+              (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
+              (assoc game :last-added-id id))))))
 
 (defn add-child-modifiers [parent child pmods]
   (let [child-id (or (:id child) (error "child has no ID! : " child))]
