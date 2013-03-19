@@ -425,7 +425,7 @@
    Warning: must not break validation rules" 
   (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
                                 ^mikera.orculje.engine.Thing changed-thing]
-    (let [loc (or (:location (get-thing game changed-thing)) (error "thing has no locaation!"))]
+    (let [loc (or (:location (get-thing game changed-thing)) (error "thing has no :location!"))]
       ; (println (str "Updating: " (into {} changed-thing)))
       (as-> game game 
           (remove-thing game changed-thing)
@@ -437,11 +437,8 @@
 (defn merge-thing 
   "Update a thing, merging in some new properties"
   ([game thing props]
-  (let [thing (merge (get-thing game thing) props)
-        loc (or (:location thing) (error "thing has no locaation!"))]
-    (as-> game game
-      (remove-thing game thing)
-      (add-thing game loc thing)))))
+  (let [thing (merge (get-thing game thing) props)]
+    (update-thing game thing))))
 
 (defn get-pred 
   "Gets the first object satisfying a predicate in a square. Considers tile last."
