@@ -441,7 +441,7 @@
         (== num number)
           (remove-thing game thing)
         (> num number)
-          (update-thing game (assoc thing (- num number)))
+          (update-thing game (assoc thing :number (- num number)))
         :else 
           (error "Trying to remove more things [" number "] than exist [" num "]")))))
 

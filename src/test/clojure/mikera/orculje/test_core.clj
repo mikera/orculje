@@ -143,14 +143,14 @@
     (is (validate game))
     (testing "removal"
        (let [game (remove-thing game t2 1)
-             t2 (get-thing game t2)])      
-         (is (== 3 (get-number t2)))
-         (is (validate game)))
+             t2 (get-thing game t2)]
+         (is (validate game))
+         (is (== 3 (get-number t2))))      )
     (testing "removal all"
        (let [game (remove-thing game t2 4)
-             t2 (get-thing game t2)])      
+             t2 (get-thing game t2)]
          (is (= nil t2))
-         (is (validate game)))))
+         (is (validate game))))))
 
 (deftest test-thing-locations
   (let [game (empty-game)
