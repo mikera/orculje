@@ -18,7 +18,7 @@
 ;; main player stats
 ;;
 ;; these are the primary statistics for characters (players and NPCs)
-;; used to determoine capabilities across various dimensions
+;; used to determine capabilities across various dimensions
 ;;
 ;; Typical ranges for humans
 ;; 0-4    : subhuman
@@ -47,6 +47,22 @@
                             :desc "determines creativity and ability to create new items"}}]
   (def MAIN-STATS (vec (keys main-stats-base)))
   (def MAIN-STAT-INFO main-stats-base))
+
+;; ==============================================================
+;; other stats generally useful for roguelike games
+
+(let [roguelike-stats-base 
+      {:speed    {:name "speed"
+                  :desc "determines movement speed relative to other actors"
+                  :default 100}
+       :aps      {:name "APs"
+                  :desc "Determines the number of action points an entity has. An entity may not move until it has aps>0."}
+       :hps      {:name "HPs"
+                  :desc "determines how much damage an entity can sustain"}
+       :hps-max  {:name "HPs max"
+                  :desc "determines maximum HPs for a being / entity"}}]
+  (def ROGUELIKE-STATS (vec (keys roguelike-stats-base)))
+  (def ROGUELIKE-STAT-INFO roguelike-stats-base))
 
 
 ;; =============================================================
@@ -131,7 +147,6 @@
 
 ;; ========================================================
 ;; skill checks and random tests
-
 
 (defn check 
   "Random skill check. Tests a skill level a against a difficulty level b.
