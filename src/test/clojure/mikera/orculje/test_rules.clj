@@ -2,3 +2,4 @@
   (:use [mikera.orculje core rules])
   (:use [clojure test]))
 
+(deftest test)

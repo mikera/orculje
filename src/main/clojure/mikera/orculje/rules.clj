@@ -44,7 +44,8 @@
                                :resist-stat :WP}
                    :acid {:factor :damage-factor-acid
                           :armour :ARM}}]
-  (def DAMAGE-TYPES 
+  (def DAMAGE_TYPES (vec (keys dtypes-base)))
+  (def DAMAGE-TYPE-INFO 
     (reduce 
       (fn [m [k v]]
         (assoc m k
@@ -58,7 +59,7 @@
 (defn calc-armour
   "Calculates the armmour of a thing vs. a specific damage type"
   [game target damage-type]
-  (let [dt (or (DAMAGE-TYPES damage-type) (error "Damage type not known [" damage-type "]"))
+  (let [dt (or (DAMAGE-TYPE-INFO damage-type) (error "Damage type not known [" damage-type "]"))
         arm-stat (:armour dt)
         arm-val (or (? game target arm-stat) 0)]
     arm-val))
@@ -66,7 +67,7 @@
 (defn calc-damage
   "Calculates damage on a target, after including immunity and resistances"
   ([game target base-damage damage-type]
-    (let [dt (or (DAMAGE-TYPES damage-type) (error "Damage type not known [" damage-type "]"))
+    (let [dt (or (DAMAGE-TYPE-INFO damage-type) (error "Damage type not known [" damage-type "]"))
           resist-stat (:resist-stat dt)
           resist-val (* 0.5 (or (? game target resist-stat) 0))
           affect-pred (:affect-pred dt)
