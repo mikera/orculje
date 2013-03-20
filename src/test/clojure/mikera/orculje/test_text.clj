@@ -27,3 +27,11 @@
 
 (deftest test-cap
   (is (= "You" (capitalise "you"))))
+
+(deftest test-plural 
+  (let [game (empty-game)]
+    (is (= "2 mice" (a-name game {:name "mouse" :number 2})))
+    (is (= "the 2 mice" (the-name game {:name "mouse" :number 2})))
+    (is (= "a mouse" (a-name game {:name "mouse" :number 1})))
+    (is (= "some water" (a-name game {:name "water" :number 2 :is-quantity true})))
+    (is (= "the water" (the-name game {:name "water" :number 2 :is-quantity true})))))

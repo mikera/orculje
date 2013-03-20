@@ -56,3 +56,22 @@
             (recur (dec i))
             (add-thing game tloc t)))))))
 
+(defn maybe-place-thing 
+  "Attempts to place a thing, returns unchanged game if placing fails" 
+  ([game l1 l2 t]
+    (or (and t (place-thing game l1 l2 t))
+        game)))
+
+
+(defn scatter-things
+  "Scatters a number of things in a given area, using the specified generator function" 
+  ([game l1 l2 num thing-or-func]
+    (reduce 
+        (fn [game _]
+          (maybe-place-thing game l1 l2 (if (fn? thing-or-func)
+                                          (thing-or-func)
+                                          thing-or-func)))
+        game
+        (range num))))
+
+

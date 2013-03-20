@@ -1,6 +1,7 @@
 (ns mikera.orculje.text
   (:use mikera.cljutils.error)
-  (:use mikera.orculje.core))
+  (:use mikera.orculje.core)
+  (:import [org.atteo.evo.inflector English]))
 
 (defn truncate-with-dots [^String s len]
   (if (<= (count s) len )
@@ -17,6 +18,9 @@
   {"is" {:second-person "are"
          :third-person "is"}})
 
+(def irregular-plural-lookup 
+  {"mouse" "mice"})
+
 (defn pronoun [thing]
   (cond
     (= :second (:grammatical-person thing)) "you"
@@ -27,6 +31,12 @@
     (error "irregular verb not yet implemented")
     (str vb (if (= \s (last vb)) "es" "s")))) 
 
+(defn pluralise [s]
+  (when s
+    (or 
+      (irregular-plural-lookup s)
+      (English/plural s))))
+
 (defn person-verb [vb person]
   (cond 
     (= :third person) (third-person-verb vb)
@@ -35,16 +45,36 @@
 (defn get-person [t]
   (or (:grammatical-person t) :third))
 
-(defn base-name [game thing]
-  (let [identified? (if-let [id-fn (:is-identified? (:functions game))]
-                      (id-fn game thing)
-                      (:is-identified thing))] 
-    (or (and (not identified?) (:unidentified-name thing))
-        (:proper-name thing)
-        (if-let [name-fn (:name-fn thing)]
-          (name-fn game thing))
-        (:name thing)
-        (error "object has no name!" thing)))) 
+(defn base-name 
+  "Returns the singular base name of a thing."
+  ([game thing]
+    (let [identified? (is-identified? game thing)] 
+      (or (and (not identified?) (:unidentified-name thing))
+          (:proper-name thing)
+          (if-let [name-fn (:name-fn thing)] (name-fn game thing))
+          (:name thing)
+          (error "object has no name!" thing))))) 
+
+(defn plural-name 
+  "Returns the pluralised base name of a thing"
+  ([game thing]
+    (let [identified? (is-identified? game thing)] 
+      (or (and (not identified?) 
+               (or (:unidentified-name-plural thing) (pluralise (:unidentified-name thing))))
+          (or (:proper-name-plural thing) (pluralise (:proper-name thing)))
+          (if-let [name-fn (:name-fn thing)] (name-fn game thing))
+          (or (:name-plural thing) (pluralise (:name thing)))
+          (error "object has no plural name!" thing)))))
+
+(defn num-name 
+  "Returns the base name of a thing plus a number if > 1"
+  ([game thing]
+    (let [num (or (:number thing) 1)
+          plural? (> num 1)
+          bname (if plural? (plural-name game thing) (base-name game thing))] 
+      (if plural?
+        (str num " " bname)
+        bname))))
 
 (defn plural? [thing]
   (if-let [num (:number thing)]
@@ -59,21 +89,32 @@
 (defn starts-with-vowel? [^String s]
   (boolean (#{\a \e \i \o \u} (.charAt s 0))))
 
-(defn the-name [game thing]
-  (or (:proper-name thing)
-      (if-let [person (:grammatical-person thing)]
-        (base-name game thing)) 
-      (str "the " (base-name game thing)))) 
+(defn the-name 
+  "Returns the name of a thing with a definite article (the)"
+  ([game thing]
+    (cond 
+      (:proper-name thing)
+        (:proper-name thing)
+      (if-let [person (:grammatical-person thing)] (= person :second))
+        (base-name game thing)
+      (:is-quantity thing) 
+        (str "the " (base-name game thing))
+      :else 
+        (str "the " (num-name game thing))))) 
 
-(defn a-name [game thing]
-  (let [bname (base-name game thing)]
-    (or (:proper-name thing)
-        (if-let [person (:grammatical-person thing)]
-          bname) 
-        (str (if (and (singular? thing) (not (:is-quantity thing)))
-               (if (starts-with-vowel? bname) "an " "a ")
-               "some ") 
-             bname)))) 
+(defn a-name 
+  "Returns the name of a thing with an indefinite article (a, some)"
+  ([game thing]
+    (cond
+      (:proper-name thing) 
+        (:proper-name thing)
+      (:is-quantity thing) 
+        (str "some " (base-name game thing)) 
+      (plural? thing) 
+        (str (:number thing) " " (plural-name game thing))
+      :else 
+        (let [bname (base-name game thing)]
+          (str (if (starts-with-vowel? bname) "an " "a ") bname))))) 
 
 (defn and-string [ss]
   (let [c (count ss)]

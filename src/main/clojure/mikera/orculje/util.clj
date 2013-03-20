@@ -58,6 +58,9 @@
     (when (< i 0) (error "item not found!"))
     (vector-without vector i)))
 
+(defn map-equals-except [ignore-key-set a b]
+  (= (reduce dissoc a ignore-key-set)
+     (reduce dissoc b ignore-key-set)))
 
 (defmacro dovec 
   "Performs an operation for each element of an indexed vector. Binds i to the index at each element."
