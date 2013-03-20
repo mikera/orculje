@@ -42,13 +42,14 @@
          (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
 
 (defn loc-bound 
-  ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
     ^mikera.orculje.engine.Location a]
     (engine/->Location (max (.x lmin) (min (.x a) (.x lmax)))
                        (max (.y lmin) (min (.y a) (.y lmax)))
                        (max (.z lmin) (min (.z a) (.z lmax))))))
 
-(defn rand-loc [^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax]
+(defn rand-loc 
+  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax]
   (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
                                 (Rand/range (lmin 1) (lmax 1))
                                 (Rand/range (lmin 2) (lmax 2)))]
@@ -74,20 +75,22 @@
 
 
 (defn loc-inc 
-  ([^mikera.orculje.engine.Location a]
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a]
     (engine/->Location (inc (.x a)) (inc (.y a)) (inc (.z a)))))
 
 
 (defn loc-dec 
-  ([^mikera.orculje.engine.Location a]
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a]
     (engine/->Location (dec (.x a)) (dec (.y a)) (dec (.z a)))))
 
 (defn loc-min 
-  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a 
+                                    ^mikera.orculje.engine.Location b]
     (engine/->Location (min (.x a) (.x b)) (min (.y a) (.y b)) (min (.z a) (.z b)))))
 
 (defn loc-max 
-  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a 
+                                    ^mikera.orculje.engine.Location b]
     (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
