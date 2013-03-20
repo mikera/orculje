@@ -477,12 +477,15 @@
           (remove-thing game thing)
           (add-thing game loc thing))))
 
+
+
 (defn update-thing
   "Updates a thing within the game. Thing must have valid ID and location
-   Warning: must not break validation rules" 
+   Warning: must not break validation rules, children must be correct and complete etc." 
   (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
                                 ^mikera.orculje.engine.Thing changed-thing]
-    (let [loc (or (:location (get-thing game changed-thing)) (error "thing has no :location!"))]
+    (let [old-thing (get-thing game changed-thing)
+          loc (or (:location old-thing) (error "thing has no :location!"))]
       ; (println (str "Updating: " (into {} changed-thing)))
       (as-> game game 
           (remove-thing game changed-thing)
@@ -600,6 +603,7 @@
 (defn validate-game-thing [game thing]
   (valid (:id thing))
   (valid (or (nil? (:things thing)) (vector? (:things thing))))
+  (valid (loc? (location game thing)))
   (if-let [loc (:location thing)]
     (if (loc? loc)
       (let [^mikera.orculje.engine.Location loc loc]
@@ -608,6 +612,10 @@
       (do 
         (valid (number? loc))
         (valid (loc? (location game thing))))))
+  (doseq [child (contents thing)]
+    (validate-game-thing game child)
+    (valid (identical? child (get-thing game child)))
+    (valid (= (:id thing) (:location child))))
   (validate-modifiers game thing))
 
 (defn validate-game [game]
