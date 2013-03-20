@@ -74,6 +74,11 @@
         (is (vector? cts))
         (is (== 1 (count cts)))
         (is (= t2 (cts 0)))))
+    (testing "update a child"
+      (let [game (update-thing game (assoc t2 :updated true))
+            t2 (get-thing game t2)]
+        (is (validate game))
+        (is (:updated t2))))
     (testing "remove it all!"
       (let [game (remove-thing game t1)]
         ;;(println game)
@@ -97,6 +102,7 @@
         t1 (assoc t1 :updated true)
         game (update-thing game t1) 
         t1 (get-thing game t1)]
+    (is (= :bar (:foo t1)))
     (is (:updated t1)) 
     (is (validate game))
     ))
@@ -129,18 +135,26 @@
 (deftest test-thing-inv-stacking
   (let [game (empty-game)
         l (loc 1 2 3)
+        t1 (thing {:foo :baz})
         t (thing {:number 2 :foo :bar :can-stack? default-can-stack?})
-        game (add-thing game l t)
+        game (add-thing game l t1)
+        _ (validate game) 
         t1 (get-thing game (:last-added-id game))
         game (add-thing game t1 t)
+        _ (validate game) 
         game (add-thing game t1 t)
+        _ (validate game) 
         t1 (get-thing game t1)
         t2 (get-thing game (:last-added-id game))
         inv (contents t1)]
+    (is (= :baz (:foo t1)))
+    (is (= :bar (:foo t2)))
+    (is (= l (:location t1)))
     (is (= 1 (count inv))) 
+    (is (= (:id t1) (:location t2))) 
+    (is (validate game)) 
     (is (= t2 (inv 0)))
     (is (= 4 (:number t2)))
-    (is (validate game))
     (testing "removal"
        (let [game (remove-thing game t2 1)
              t2 (get-thing game t2)]

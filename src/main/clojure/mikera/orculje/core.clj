@@ -300,9 +300,9 @@
       tm)))
 
 (defn try-stack 
-  "Attempts to stack an object in a terget vector of things. 
+  "Attempts to stack an object in a target vector of things. 
    Either a) completes the stacking operation and returns updated game
-          b) returns nil is stacking is not possible"
+          b) returns nil if stacking is not possible"
   ([game ob potential-stack-vector]
     (if-let [can-stack? (:can-stack? ob)]
       (let [sc #(can-stack? ob %)
@@ -426,7 +426,8 @@
         thing (or (get-thing game thing) (error "Can't find child thing!"))
         new-parent (remove-child parent thing)]
     (as-> game game
-      (update-thing game new-parent) ;; note this handles child removal from :thing-map
+      (assoc game :thing-map (dissoc thing-map (:id thing)))
+      (update-thing game new-parent) 
       )))
 
 (defn remove-thing
@@ -477,6 +478,23 @@
           (remove-thing game thing)
           (add-thing game loc thing))))
 
+(defn- update-thing-within-parent [game parent-id changed-id changed-thing]
+  (let [tm (:thing-map game) 
+        parent (or (tm parent-id) (error "Parent not found!!"))
+        pconts (or (:things parent) (error "Parent has no things?!?"))
+        i (find/find-index #(= (:id %) changed-id) pconts)
+        nconts (assoc pconts i changed-thing)
+        nparent (assoc parent :things nconts)]
+    (update-thing game nparent)))
+
+(defn- update-thing-within-map [game ^mikera.orculje.engine.Location tloc changed-id changed-thing]
+  (let [x (.x tloc) y (.y tloc) z (.z tloc)
+        ^PersistentTreeGrid grid (:things game) 
+        lconts (or (.get grid x y z) (error "Map location has no things?!?"))
+        i (find/find-index #(= (:id %) changed-id) lconts)
+        nconts (assoc lconts i changed-thing)
+        ngrid (.set grid x y z nconts)]
+    (assoc game :things ngrid)))
 
 
 (defn update-thing
@@ -484,14 +502,16 @@
    Warning: must not break validation rules, children must be correct and complete etc." 
   (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
                                 ^mikera.orculje.engine.Thing changed-thing]
-    (let [old-thing (get-thing game changed-thing)
-          loc (or (:location old-thing) (error "thing has no :location!"))]
+    (let [id (or (:id changed-thing) (error "No valid ID on updated thing"))
+          old-thing (get-thing game changed-thing)
+          l (or (:location old-thing) (error "Thing to be updated has no :location!"))]
       ; (println (str "Updating: " (into {} changed-thing)))
       (as-> game game 
-          (remove-thing game changed-thing)
-          ;(do (println game) game)
-          (add-thing game loc changed-thing)
-          ;(do (println game) game)          
+          (if (number? l)
+            (update-thing-within-parent game l id changed-thing)
+            (update-thing-within-map game l id changed-thing))
+          (assoc game :thing-map (assoc (:thing-map game) id changed-thing))
+          (assoc game :last-added-id id)     
           ))))
 
 (defn default-can-stack? 
@@ -505,7 +525,8 @@
   "Stacks the object source into the object dest, according to the :stack-fn function.
    Source is assumed to have been removed from the map."
   ([game source dest]
-    (let [stack-fn (or (:stack-fn source) (fn [a b] (assoc b :number (+ (get-number a) (get-number b)))))]
+    (let [stack-fn (or (:stack-fn source) 
+                       (fn [a b] (assoc b :number (+ (get-number a) (get-number b)))))]
       (as-> game game
             (update-thing game (stack-fn source dest))))))
 
@@ -608,7 +629,8 @@
     (if (loc? loc)
       (let [^mikera.orculje.engine.Location loc loc]
         (valid 
-          (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))))
+          (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))
+          (str "Cannot find thing within map contents vector for location.")))
       (do 
         (valid (number? loc))
         (valid (loc? (location game thing))))))
