@@ -1,7 +1,11 @@
 (ns mikera.orculje.rules
   (:use mikera.orculje.core)
   (:use mikera.cljutils.error)
-  (:use mikera.orculje.util))
+  (:use mikera.orculje.util)
+  (:import [mikera.util Rand]))
+
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* true)
 
 ;; ============================================================
 ;; General game rules for the orculje engine
@@ -124,3 +128,22 @@
       (if affected?
         (long* factor base-damage (/ base-damage (+ resist-val base-damage)))
         0))))
+
+;; ========================================================
+;; skill checks and random tests
+
+
+(defn check 
+  "Random skill check. Tests a skill level a against a difficulty level b.
+   Difficulties should be proportional to main player stats."
+  ([^double a ^double b]
+    (> a (* (Rand/nextDouble) (+ a b)))))
+
+(defn multiple-check 
+  "Performs a skill check muliple times. Returns the number of sucecsses"
+  ([^double a ^double b ^long n]
+    (let [chance (/ a (+ a b))]
+      (loop [i 0 succ 0]
+        (if (< i n)
+          (recur (inc i) (if (Rand/chance chance) (inc succ) succ))
+          succ))))) 

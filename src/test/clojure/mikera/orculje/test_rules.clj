@@ -33,3 +33,8 @@
     (is (keyword? (:armour dt)))
     (is (number? (:default-factor dt)))
     (is (contains? MAIN-STAT-INFO (:resist-stat dt)))))
+
+(deftest validate-checks
+  (is (number? (multiple-check 1 1 10)))
+  (is (check 1 0))
+  (is (not (check 0 1))))
