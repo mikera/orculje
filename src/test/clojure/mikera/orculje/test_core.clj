@@ -76,14 +76,14 @@
         (is (= t2 (cts 0)))))
     (testing "update a child"
       (let [game (update-thing game (assoc t2 :updated true))
-            t1 (get-thing game t2)
+            t1 (get-thing game t1)
             t2 (get-thing game t2)]
         (is (validate game))
         (is (? t1 :modified-by-child))
         (is (:updated t2))))
     (testing "update a child removing modifiers"
       (let [game (update-thing game (assoc t2 :parent-modifiers nil))
-            t1 (get-thing game t2)
+            t1 (get-thing game t1)
             t2 (get-thing game t2)]
         (is (validate game))
         (is (not (? t1 :modified-by-child)))))
