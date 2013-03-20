@@ -148,7 +148,7 @@
          v#)))
   ([game thing key]
     `(let [~'game ~game
-           t# ((:thing-map ~'game) (:id ~thing))]
+           t# (or (and ~'game ((:thing-map ~'game) (:id ~thing))) thing)]
        (? t# ~key))))
 
 (defmacro ! 

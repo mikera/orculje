@@ -6,9 +6,10 @@
 ;; ============================================================
 ;; General game rules for the orculje engine
 ;;
-;; These are optional for user of the orculje library
+;; These are all optional for users of the orculje library
 ;; however they present a pretty good "ready-built" RPG system
-;; designed for use with the orculje library
+;; designed for use with the orculje library. 
+
 
 
 ;; =============================================================
@@ -24,6 +25,7 @@
 ;; - a resistance bonus stat (e.g. :resist-fire)
 
 (def DEFAULT-RESIST-STAT :TG)   ;; stat used to reduce damage types
+(def STAT-RESIST-FACTOR 0.5)    ;; fixed at 0.5
 (def DEFAULT-DAMAGE-FACTOR 1.0) ;; multiplier for damage types, can be overrided by vulnerable / invulnerable creatures
 
 (let [dtypes-base {:normal {:factor :damage-factor-normal
@@ -51,25 +53,37 @@
         (assoc m k
           (as-> v v
                 (assoc v :resist-stat (or (:resist-stat v) DEFAULT-RESIST-STAT))
-                (assoc v :default-factor (or (:default-factor v) DEFAULT-DAMAGE-FACTOR)))))
+                (assoc v :default-factor (or (:default-factor v) DEFAULT-DAMAGE-FACTOR))
+                (assoc v :resist (or (:resist v) (keyword (str "resist-" (name k)))))
+                (assoc v :armour (or (:armour v) (keyword (str "armour-" (name k))))))))
       dtypes-base
       dtypes-base)))
 
 
 (defn calc-armour
-  "Calculates the armmour of a thing vs. a specific damage type"
-  [game target damage-type]
+  "Calculates the armour of a thing vs. a specific damage type"
+  ^double [game target damage-type]
   (let [dt (or (DAMAGE-TYPE-INFO damage-type) (error "Damage type not known [" damage-type "]"))
-        arm-stat (:armour dt)
-        arm-val (or (? game target arm-stat) 0)]
+        arm-stat (or (:armour dt) (error "No armour stat available for damage type " damage-type))
+        arm-val (or (? game target arm-stat) 0.0)]
     arm-val))
+
+(defn calc-resistance 
+  "Calculates the resistance of a thing vs. a specific damage type"
+  ^double [game target damage-type]
+  (let [dt (or (DAMAGE-TYPE-INFO damage-type) (error "Damage type not known [" damage-type "]"))
+        resist-stat (:resist-stat dt)
+        resist-val (* STAT-RESIST-FACTOR (double (or (? game target resist-stat) 0.0)))
+        resist-bonus-stat (:resist dt) 
+        resist-bonus (double (or (? game target resist-bonus-stat) 0.0))]
+    (+ resist-val resist-bonus))) 
 
 (defn calc-damage
   "Calculates damage on a target, after including immunity and resistances"
   ([game target base-damage damage-type]
     (let [dt (or (DAMAGE-TYPE-INFO damage-type) (error "Damage type not known [" damage-type "]"))
           resist-stat (:resist-stat dt)
-          resist-val (* 0.5 (or (? game target resist-stat) 0))
+          resist-val (calc-resistance game target damage-type)
           affect-pred (:affect-pred dt)
           affected? (or (not affect-pred) (affect-pred target))
           factor-stat (or (:factor dt) (error "Damage type [" damage-type  "]  has no :factor"))
