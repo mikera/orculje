@@ -23,3 +23,13 @@
       (== 0.0 (calc-armour nil t :poison ))
       (== 2.0 (calc-resistance nil t :poison ))
       (== 0.0 (calc-damage nil t 4 :poison )))))
+
+(deftest validate-damage-types
+  (doseq [dt (vals DAMAGE-TYPE-INFO)]
+    ;; (println (str dt))
+    (is (keyword? (:resist-stat dt)))
+    (is (keyword? (:resist dt)))
+    (is (keyword? (:factor dt)))
+    (is (keyword? (:armour dt)))
+    (is (number? (:default-factor dt)))
+    (is (contains? MAIN-STAT-INFO (:resist-stat dt)))))

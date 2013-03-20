@@ -10,6 +10,39 @@
 ;; however they present a pretty good "ready-built" RPG system
 ;; designed for use with the orculje library. 
 
+;; =============================================================
+;; main player stats
+;;
+;; these are the primary statistics for characters (players and NPCs)
+;; used to determoine capabilities across various dimensions
+;;
+;; Typical ranges for humans
+;; 0-4    : subhuman
+;; 5-10   : regular human
+;; 10-20  : skilled human
+;; 20-40  : masterful human
+;; 40-80  : legendary human / hero
+;; 80-160 : superhuman
+;; 160+   : demigod
+
+(let [main-stats-base {:SK {:name "skill"
+                            :desc "determines physical skill and dexterity"}
+                       :ST {:name "strength"
+                            :desc "determines pure physical strength"}
+                       :AG {:name "agility"
+                            :desc "determines physical agility and reaction speed"}
+                       :TG {:name "toughness"
+                            :desc "determines ability to resist phyical hardships and damage"}
+                       :IN {:name "intelligence"
+                            :desc "determines mental aptitude and ability to solve problems"}
+                       :WP {:name "willpower"
+                            :desc "determines strength of will and ability to resist mental attacks" }
+                       :CH {:name "charisma"
+                            :desc "determines social skill and ability to interact with others"}
+                       :CR {:name "craft"
+                            :desc "determines creativity and ability to create new items"}}]
+  (def MAIN-STATS (vec (keys main-stats-base)))
+  (def MAIN-STAT-INFO main-stats-base))
 
 
 ;; =============================================================
