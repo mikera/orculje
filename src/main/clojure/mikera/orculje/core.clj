@@ -333,17 +333,22 @@
               (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
               (assoc game :last-added-id id))))))
 
-(defn add-child-modifiers [parent child pmods]
-  (let [child-id (or (:id child) (error "child has no ID! : " child))]
-    (reduce
-      (fn [parent mod]
-        (let [k (or (:key mod) (error "modifier has no :key " mod))
-              all-mods (:modifiers parent)
-              key-mods (k all-mods)
-              new-mod (assoc mod :source child-id)]
-          (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods)))))
+(defn add-child-modifiers 
+  ([parent child]
+    (if-let [pmods (:parent-modifiers child)]
+      (add-child-modifiers parent child pmods)
+      parent))
+  ([parent child pmods]
+    (let [child-id (or (:id child) (error "child has no ID! : " child))]
+      (reduce
+        (fn [parent mod]
+          (let [k (or (:key mod) (error "modifier has no :key " mod))
+                all-mods (:modifiers parent)
+                key-mods (k all-mods)
+                new-mod (assoc mod :source child-id)]
+            (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods)))))
         parent
-        pmods)))
+        pmods))))
 
 (defn- add-child [parent child]
   (as-> parent parent
@@ -483,9 +488,12 @@
         parent (or (tm parent-id) (error "Parent not found!!"))
         pconts (or (:things parent) (error "Parent has no things?!?"))
         i (find/find-index #(= (:id %) changed-id) pconts)
-        nconts (assoc pconts i changed-thing)
-        nparent (assoc parent :things nconts)]
-    (update-thing game nparent)))
+        new-conts (assoc pconts i changed-thing)
+        parent (remove-child-modifiers parent (:id changed-thing))
+        parent (assoc parent :things new-conts)
+        new-parent (add-child-modifiers parent changed-thing)]
+    (as-> game game
+      (update-thing game new-parent))))
 
 (defn- update-thing-within-map [game ^mikera.orculje.engine.Location tloc changed-id changed-thing]
   (let [x (.x tloc) y (.y tloc) z (.z tloc)
