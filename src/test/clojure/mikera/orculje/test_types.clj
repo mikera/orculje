@@ -16,9 +16,9 @@
 
 (ann clojure.core/*unchecked-math* Boolean)
 
-(ann-datatype mikera.orculje.engine.Location [x :- Integer
-                                              y :- Integer
-                                              z :- Integer])
+(ann-datatype mikera.orculje.engine.Location [x :- int
+                                              y :- int
+                                              z :- int])
 
 (ann mikera.orculje.core/SPECIAL-PROPERTIES Map)
 
@@ -80,8 +80,9 @@
 ;;(ann foo [Any -> Number])
 ;; (defn foo [x] "Hello")
 
-
 ;;(deftest test-check-ns
-;;  (is ))
+;;  (is 
+;;    (check-ns 'mikera.orculje.core)
+;;    ))
 
 ;; (check-ns 'mikera.orculje.core)
