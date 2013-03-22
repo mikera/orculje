@@ -40,6 +40,7 @@
     ))
 
 (deftest test-modifier
+  (is (:key (modifier :SK (+ nil nil)))) ;; calculation should error if evaluated
   (let [game (empty-game)
         t (thing {:SK 10 
                   :modifiers {:SK [(modifier :SK (+ value 15))]}})]

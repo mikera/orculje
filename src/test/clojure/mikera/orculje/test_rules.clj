@@ -38,3 +38,21 @@
   (is (number? (multiple-check 1 1 10)))
   (is (check 1 0))
   (is (not (check 0 1))))
+
+(deftest test-wielding
+  (let [game (empty-game)
+        h (thing {:is-hero true})
+        l (loc 0 0 0)
+        game (add-thing game l h)
+        h (get-thing game (:last-added-id game))
+        w (thing (merge ATT_SWORD {:parent-modifiers [(modifier :fearsome true
+                                                                {:when-effective (fn [mod parent child] (:wielded child))})]}))
+        game (add-thing game h w)
+        w (get-thing game (:last-added-id game))
+        h (get-thing game h)]
+    (is (:parent-modifiers w))
+    (is (= l (location game w)))
+    (is (= (:id h) (:location w)))
+    (is (not (? game h :fearsome)))
+    (let [game (wield game h w :right-hand)]
+      (is (? game h :fearsome)))))

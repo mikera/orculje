@@ -118,12 +118,18 @@
 ;; modifier definition
 ;;
 ;; usage: (modifier :SK (+ value (:ST thing) (:global-st-uplift (:globals game))))
-(defmacro modifier [property expr]
-  `(let [key# ~property]
-     {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
-                ~expr)
-      :priority 0
-      :key key#}))
+(defmacro modifier 
+  ([property expr]
+    `(modifier ~property ~expr nil))
+  ([property expr extra-props]
+    `(let [key# ~property
+           eprops# ~extra-props]
+       (merge 
+         {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
+                    ~expr)
+          :priority 0
+          :key key#}
+         eprops#))))
 
 ;; =======================================================
 ;; Thing subsystem

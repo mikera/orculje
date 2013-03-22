@@ -264,7 +264,8 @@
   "Unwields all items that satisfy a specific predicate"
   ([game actor removal-pred]
     (reduce
-      #(unwield game actor %)
+      (fn [game item] (unwield game actor item))
+      game
       (filter removal-pred (contents actor)))))
 
 (defn wield
@@ -272,4 +273,4 @@
   ([game actor item wt]
     (as-> game game
           (unwield-items game actor (:replaces (WIELD-TYPES wt)))
-          (update-thing game (assoc item :wielded)))))
+          (update-thing game (assoc item :wielded wt)))))
