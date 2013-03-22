@@ -4,7 +4,10 @@
   (:import [clojure.lang Seqable]) 
   (:import [java.util Map]) 
   (:require [clojure.main])
-  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]]))
+;;  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]])
+  )
+
+#_(do
 
 (def-alias Location mikera.orculje.engine.Location)
 (def-alias Location? (U nil Location))
@@ -19,6 +22,7 @@
 (ann-datatype mikera.orculje.engine.Location [x :- int
                                               y :- int
                                               z :- int])
+
 
 (ann mikera.orculje.core/SPECIAL-PROPERTIES Map)
 
@@ -86,3 +90,5 @@
 ;;    ))
 
 ;; (check-ns 'mikera.orculje.core)
+
+)

@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>core.typed</groupId>
 			<artifactId>core.typed</artifactId>
-			<version>0.1.8</version>
+			<version>0.1.9-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
