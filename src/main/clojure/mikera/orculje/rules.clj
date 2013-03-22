@@ -277,3 +277,8 @@
     (as-> game game
           (unwield-items game actor #((:replaces (WIELD-TYPES wt)) (:wielded %)))
           (update-thing game (assoc item :wielded wt)))))
+
+(defn get-wielded 
+  "Returns the item that is wielded in particular position, or nil if not found."
+  ([actor wield-type]
+    (first (filter #((:replaces (WIELD-TYPES wield-type)) (:wielded %)) (contents actor)))))
