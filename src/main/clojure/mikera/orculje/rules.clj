@@ -169,18 +169,30 @@
 ;; libary definitions - weapons & attacks
 
 (let [wield-props 
-      {:right-hand {:replaces #{:two-hands}}
-       :left-hand {:replaces #{:two-hands}}
-       :two-hands {:replaces #{:right-hand :left-hand}}
-       :head {:replaces #{:two-hands}}
-       :body {:replaces #{:two-hands}}
-       :legs {:replaces #{:two-hands}}
-       :full-body {:replaces #{:body}}
-       :cloak {} 
-       :necklace {} 
-       :right-ring {}
-       :left-ring {}
-       :feet {}}] 
+      {:right-hand {:desc "right hand"
+                    :replaces #{:two-hands}}
+       :left-hand {:desc "left hand"
+                   :replaces #{:two-hands}}
+       :two-hands {:desc "two hands"
+                   :replaces #{:right-hand :left-hand}}
+       :missile-weapon {:desc "missile weapon"}
+       :missiles {:desc "missiles"
+                  :allow-stack true}
+       :head {:desc "head"
+              :replaces #{:two-hands}}
+       :body {:desc "body"
+              :replaces #{:two-hands}}
+       :legs {:desc "legs"
+              :replaces #{:two-hands}}
+       :full-body {:desc "full body"
+                   :replaces #{:body :legs :arms}}
+       :gloves {:desc "hands"} 
+       :arms {:desc "arms"} 
+       :cloak {:desc "cloak"} 
+       :necklace {:desc "neck"} 
+       :right-ring {:desc "right ringfinger"}
+       :left-ring {:desc "left ringfinger"}
+       :feet {:desc "feet"}}] 
   (def WIELD_TYPES (reduce
                      (fn [wps [wt props]]
                        (let [reps (or (:replaces props) #{})
@@ -243,6 +255,21 @@
                  :damage-type :normal 
                  :wield-types [:right-hand :left-hand]})
 
-(defn unwield [game actor item])
+(defn unwield 
+  "Unwield a single item. The item remains in the actors inventory."
+  ([game actor item]
+    (update-thing game (dissoc item :wielded))))
 
-(defn wield [game actor weapon])
+(defn unwield-items
+  "Unwields all items that satisfy a specific predicate"
+  ([game actor removal-pred]
+    (reduce
+      #(unwield game actor %)
+      (filter removal-pred (contents actor)))))
+
+(defn wield
+  "Wields/wears an item in a specific slot. Removes other items in the same / overlapping slots."
+  ([game actor weapon wt]
+    (as-> game game
+          (unwield-items game actor (:replaces (WIELD-TYPES wt)))
+          (update-thing game (assoc item :wielded)))))
