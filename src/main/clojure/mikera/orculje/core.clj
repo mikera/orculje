@@ -194,6 +194,8 @@
             (recur (:location (get-thing game l)))))
       (loc? thing)
         thing
+      (not thing)
+        (error "nil thing passed to location!") 
       :else 
         (loc thing))))
 
