@@ -193,7 +193,7 @@
        :right-ring {:desc "right ringfinger"}
        :left-ring {:desc "left ringfinger"}
        :feet {:desc "feet"}}] 
-  (def WIELD_TYPES (reduce
+  (def WIELD-TYPES (reduce
                      (fn [wps [wt props]]
                        (let [reps (or (:replaces props) #{})
                              props (assoc props :replaces (conj reps wt))]
@@ -269,7 +269,7 @@
 
 (defn wield
   "Wields/wears an item in a specific slot. Removes other items in the same / overlapping slots."
-  ([game actor weapon wt]
+  ([game actor item wt]
     (as-> game game
           (unwield-items game actor (:replaces (WIELD-TYPES wt)))
           (update-thing game (assoc item :wielded)))))

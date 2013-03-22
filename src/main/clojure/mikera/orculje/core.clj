@@ -26,6 +26,10 @@
    :can-stack? {:desc "A (fn [a b]...) that returns true if a can stack with b"}
    :stack-fn {:desc "A (fn [a b]...) that returns a combined stack of a and b"}})
 
+(def MODIFIER-SPECIAL-PROPERTIES
+  {:key "Keyword indicating the property that the modifier affects"
+   :when-effective "(fn [mod parent child] ...) that returns true when the modifier should be effective"})
+
 ;; =======================================================
 ;; location handling
 
@@ -348,11 +352,14 @@
     (let [child-id (or (:id child) (error "child has no ID! : " child))]
       (reduce
         (fn [parent mod]
-          (let [k (or (:key mod) (error "modifier has no :key " mod))
-                all-mods (:modifiers parent)
-                key-mods (k all-mods)
-                new-mod (assoc mod :source child-id)]
-            (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods)))))
+          (let [when-effective (:when-effective mod)]
+            (if (or (not when-effective) (when-effective mod parent child))
+              (let [k (or (:key mod) (error "modifier has no :key " mod))
+                    all-mods (:modifiers parent)
+                    key-mods (k all-mods)
+                    new-mod (assoc mod :source child-id)]
+                (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods))))
+              parent)))
         parent
         pmods))))
 
