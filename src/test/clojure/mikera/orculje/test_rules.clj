@@ -54,5 +54,26 @@
     (is (= l (location game w)))
     (is (= (:id h) (:location w)))
     (is (not (? game h :fearsome)))
+    
+    (is (== 1 (count (contents h))))
+    
     (let [game (wield game h w :right-hand)]
-      (is (? game h :fearsome)))))
+      (is (? game h :fearsome))
+      (is (== 1 (count (filter :wielded (contents game h))))))
+    
+    (let [game (wield game h w :right-hand)
+          game (unwield game h (get-thing game w))]
+      (is (not (? game h :fearsome))))
+    
+    (is ((:replaces (WIELD-TYPES :right-hand)) :right-hand))
+    (let [game (wield game h w :right-hand)
+          w2 (thing {:foo :bar})
+          game (add-thing game h w2)
+          w2 (get-thing game (:last-added-id game))
+          game (wield game h w2 :right-hand)
+          w2 (get-thing game w2)
+          w (get-thing game w)]
+      ;; (println (seq (contents game h))) 
+      (is (:wielded w2))
+      (is (not (:wielded w)))
+      (is (not (? game h :fearsome))))))

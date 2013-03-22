@@ -263,14 +263,17 @@
 (defn unwield-items
   "Unwields all items that satisfy a specific predicate"
   ([game actor removal-pred]
-    (reduce
-      (fn [game item] (unwield game actor item))
-      game
-      (filter removal-pred (contents actor)))))
+    (let [items-to-unwield (filter removal-pred (contents game actor))]
+      ;; (println (str "unwielding: " (seq items-to-unwield)))
+      (reduce
+        (fn [game item]      
+          (unwield game actor item))
+        game
+        items-to-unwield))))
 
 (defn wield
   "Wields/wears an item in a specific slot. Removes other items in the same / overlapping slots."
   ([game actor item wt]
     (as-> game game
-          (unwield-items game actor (:replaces (WIELD-TYPES wt)))
+          (unwield-items game actor #((:replaces (WIELD-TYPES wt)) (:wielded %)))
           (update-thing game (assoc item :wielded wt)))))
