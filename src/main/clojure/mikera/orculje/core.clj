@@ -118,6 +118,10 @@
 ;; modifier definition
 ;;
 ;; usage: (modifier :SK (+ value (:ST thing) (:global-st-uplift (:globals game))))
+
+(defn effective-when-wielded [mod parent child]
+  (:wielded child))
+
 (defmacro modifier 
   ([property expr]
     `(modifier ~property ~expr nil))
@@ -130,6 +134,12 @@
           :priority 0
           :key key#}
          eprops#))))
+
+(defmacro wielded-modifier
+  ([property expr]
+    `(modifier ~property ~expr {:when-effective effective-when-wielded}))
+  ([property expr extra-props]
+    `(modifier ~property ~expr (merge ~extra-props {:when-effective effective-when-wielded})))) 
 
 ;; =======================================================
 ;; Thing subsystem

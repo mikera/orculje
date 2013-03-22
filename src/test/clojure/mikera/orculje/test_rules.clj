@@ -45,8 +45,7 @@
         l (loc 0 0 0)
         game (add-thing game l h)
         h (get-thing game (:last-added-id game))
-        w (thing (merge ATT_SWORD {:parent-modifiers [(modifier :fearsome true
-                                                                {:when-effective (fn [mod parent child] (:wielded child))})]}))
+        w (thing (merge ATT_SWORD {:parent-modifiers [(wielded-modifier :fearsome true)]}))
         game (add-thing game h w)
         w (get-thing game (:last-added-id game))
         h (get-thing game h)]
