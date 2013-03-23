@@ -145,6 +145,7 @@
         (long* factor base-damage (/ base-damage (+ resist-val base-damage)))
         0))))
 
+
 ;; ========================================================
 ;; skill checks and random tests
 
