@@ -164,14 +164,19 @@
           (recur (inc i) (if (Rand/chance chance) (inc succ) succ))
           succ))))) 
 
+(defn hash-check 
+  "Performs a skill check with a consistent result for a given hash-object"
+  [^double a ^double b hash-object] 
+  (> a (* (Rand/nextDouble) (+ a b)))) 
+
 ;; ===================================================
 ;; Person characteristics
 
 (defn female? [p]
-  (is (= :female (:gender p))))
+  (= :female (:gender p)))
 
 (defn male? [p]
-  (is (= :female (:gender p))))
+  (= :female (:gender p)))
 
 ;; ===================================================
 ;; libary definitions - weapons & attacks
