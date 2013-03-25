@@ -17,7 +17,8 @@
 
 (def verb-lookup 
   {"is" {:second-person "are"
-         :third-person "is"}})
+         :third-person "is"}
+   "cry" {:third-person "cries"}})
 
 (def irregular-plural-lookup 
   {"mouse" "mice"})
