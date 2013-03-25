@@ -176,7 +176,7 @@
   (= :female (:gender p)))
 
 (defn male? [p]
-  (= :female (:gender p)))
+  (= :male (:gender p)))
 
 ;; ===================================================
 ;; libary definitions - weapons & attacks
@@ -194,13 +194,17 @@
        :head {:desc "head"
               :replaces #{:two-hands}}
        :body {:desc "body"
-              :replaces #{:two-hands}}
+              :replaces #{:full-body :jacket}}
+       :jacket {:desc "jacket"
+              :replaces #{:full-body :body}}
        :legs {:desc "legs"
-              :replaces #{:two-hands}}
+              :replaces #{:full-body}}
        :full-body {:desc "full body"
-                   :replaces #{:body :legs :arms}}
+                   :replaces #{:body :legs :arms :jacket}}
        :gloves {:desc "hands"} 
-       :arms {:desc "arms"} 
+       :wrists {:desc "wrists"}
+       :arms {:desc "arms"
+              :replaces #{:full-body}} 
        :cloak {:desc "cloak"} 
        :necklace {:desc "neck"} 
        :shirt {:desc "undershirt"}
