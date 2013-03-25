@@ -164,7 +164,14 @@
           (recur (inc i) (if (Rand/chance chance) (inc succ) succ))
           succ))))) 
 
+;; ===================================================
+;; Person characteristics
 
+(defn female? [p]
+  (is (= :female (:gender p))))
+
+(defn male? [p]
+  (is (= :female (:gender p))))
 
 ;; ===================================================
 ;; libary definitions - weapons & attacks
@@ -191,8 +198,11 @@
        :arms {:desc "arms"} 
        :cloak {:desc "cloak"} 
        :necklace {:desc "neck"} 
+       :shirt {:desc "undershirt"}
+       :undergarments {:desc "underwear"} 
        :right-ring {:desc "right ringfinger"}
        :left-ring {:desc "left ringfinger"}
+       :socks {:desc "socks"} 
        :feet {:desc "feet"}}] 
   (def WIELD-TYPES (reduce
                      (fn [wps [wt props]]
