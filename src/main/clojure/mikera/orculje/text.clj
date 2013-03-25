@@ -30,8 +30,8 @@
     :else "it"))
 
 (defn third-person-verb [vb]
-  (if-let [irregular (verb-lookup vb)]
-    (error "irregular verb not yet implemented")
+  (or 
+    (if-let [irregular (verb-lookup vb)] (:third-person irregular))
     (str vb (if (= \s (last vb)) "es" "s")))) 
 
 (defn pluralise [s]
