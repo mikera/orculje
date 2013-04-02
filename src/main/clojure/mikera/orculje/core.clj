@@ -5,7 +5,8 @@
   (:import [mikera.util Rand Maths])
   (:import [mikera.orculje Finder])
   (:require [mikera.orculje.engine :as engine])
-  (:require [mikera.cljutils.find :as find]))
+  (:require [mikera.cljutils.find :as find])
+  (:require [mikera.cljutils.loops :refer [dovec]]))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)

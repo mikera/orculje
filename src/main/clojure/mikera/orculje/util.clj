@@ -61,26 +61,3 @@
 (defn map-equals-except [ignore-key-set a b]
   (= (reduce dissoc a ignore-key-set)
      (reduce dissoc b ignore-key-set)))
-
-(defmacro dovec 
-  "Performs an operation for each element of an indexed vector. Binds i to the index at each element."
-  ([[sym v :as bindings] & body]
-    (when-not (vector? bindings) (error "dovec requires a binding vector"))
-    (when-not (symbol? sym) (error "dovec binding requires a symbol"))
-    `(let [v# ~v
-           c# (count v#)]
-       (loop [~'i 0]
-         (if (< ~'i c#)
-           (let [~sym (v# ~'i)] ~@body)
-           nil)))))
-
-(defmacro or-loop 
-  "Evaluates body repeatedly up to a given number of times, until it returns a truthy value. 
-   Returns nil if a truthy value is not found."
-  ([[times :as bindings] & body]
-    (when-not (vector? bindings) (error "or-loop requires a binding vector"))
-    `(loop [tries# ~times]
-       (if (<= tries# 0) nil
-         (if-let [res# (do ~@body)]
-           res#
-           (recur (dec tries#)))))))
