@@ -4,11 +4,6 @@
   (:use mikera.orculje.core)
   (:import [org.atteo.evo.inflector English]))
 
-(defn truncate-with-dots [^String s len]
-  (if (<= (count s) len )
-    s
-    (str (.substring s 0 (- len 3)) "...")))
-
 (def name-hints
   {:number "Number of items, used to show plutrality"
    :is-quantity "Used to falg a quanitifiable substance, e.g. 'water'"
