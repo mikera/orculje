@@ -1,5 +1,6 @@
 (ns mikera.orculje.core
   (:use mikera.cljutils.error)
+  (:use mikera.cljutils.vectors)
   (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand Maths])
