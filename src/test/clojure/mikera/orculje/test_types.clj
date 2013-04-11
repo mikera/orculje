@@ -4,7 +4,7 @@
   (:import [clojure.lang Seqable]) 
   (:import [java.util Map]) 
   (:require [clojure.main])
-;;  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]])
+  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]])
   )
 
 #_(do
@@ -17,7 +17,7 @@
 (def-alias Game? (U nil Game))
 (def-alias Properties Any)
 
-(ann clojure.core/*unchecked-math* Boolean)
+(ann ^:nocheck clojure.core/*unchecked-math* Boolean)
 
 (ann-datatype mikera.orculje.engine.Location [x :- int
                                               y :- int
@@ -89,6 +89,6 @@
 ;;    (check-ns 'mikera.orculje.core)
 ;;    ))
 
-;; (check-ns 'mikera.orculje.core)
+(check-ns 'mikera.orculje.core)
 
 )
