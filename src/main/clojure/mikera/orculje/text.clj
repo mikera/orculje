@@ -1,12 +1,8 @@
 (ns mikera.orculje.text
-  (:use mikera.cljutils.error)
+  (:use [mikera.cljutils error])
+  (:require [mikera.cljutils.find :as find])
   (:use mikera.orculje.core)
   (:import [org.atteo.evo.inflector English]))
-
-(defn truncate-with-dots [^String s len]
-  (if (<= (count s) len )
-    s
-    (str (.substring s 0 (- len 3)) "...")))
 
 (def name-hints
   {:number "Number of items, used to show plutrality"
@@ -16,7 +12,8 @@
 
 (def verb-lookup 
   {"is" {:second-person "are"
-         :third-person "is"}})
+         :third-person "is"}
+   "cry" {:third-person "cries"}})
 
 (def irregular-plural-lookup 
   {"mouse" "mice"})
@@ -24,11 +21,12 @@
 (defn pronoun [thing]
   (cond
     (= :second (:grammatical-person thing)) "you"
+    (:gender thing) (if (= :male (:gender thing))  "he" "she") 
     :else "it"))
 
 (defn third-person-verb [vb]
-  (if-let [irregular (verb-lookup vb)]
-    (error "irregular verb not yet implemented")
+  (or 
+    (if-let [irregular (verb-lookup vb)] (:third-person irregular))
     (str vb (if (= \s (last vb)) "es" "s")))) 
 
 (defn pluralise [s]
@@ -117,8 +115,10 @@
           (str (if (starts-with-vowel? bname) "an " "a ") bname))))) 
 
 (defn and-string [ss]
-  (let [c (count ss)]
+  (let [ss (find/eager-filter identity ss)
+        c (count ss)]
     (cond 
+      (== c 0) nil
       (== c 1) (first ss)
       (== c 2) (str (first ss) " and " (second ss))
       :else (str

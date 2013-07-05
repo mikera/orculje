@@ -145,6 +145,7 @@
         (long* factor base-damage (/ base-damage (+ resist-val base-damage)))
         0))))
 
+
 ;; ========================================================
 ;; skill checks and random tests
 
@@ -162,3 +163,142 @@
         (if (< i n)
           (recur (inc i) (if (Rand/chance chance) (inc succ) succ))
           succ))))) 
+
+(defn hash-check 
+  "Performs a skill check with a consistent result for a given hash-object"
+  [^double a ^double b hash-object] 
+  (> a (* (Rand/nextDouble) (+ a b)))) 
+
+;; ===================================================
+;; Person characteristics
+
+(defn female? [p]
+  (= :female (:gender p)))
+
+(defn male? [p]
+  (= :male (:gender p)))
+
+;; ===================================================
+;; libary definitions - weapons & attacks
+
+(let [wield-props 
+      {:right-hand {:desc "right hand"
+                    :replaces #{:two-hands}}
+       :left-hand {:desc "left hand"
+                   :replaces #{:two-hands}}
+       :two-hands {:desc "two hands"
+                   :replaces #{:right-hand :left-hand}}
+       :missile-weapon {:desc "missile weapon"}
+       :missiles {:desc "missiles"
+                  :allow-stack true}
+       :head {:desc "head"
+              :replaces #{:two-hands}}
+       :body {:desc "body"
+              :replaces #{:full-body :jacket}}
+       :jacket {:desc "jacket"
+              :replaces #{:full-body :body}}
+       :legs {:desc "legs"
+              :replaces #{:full-body}}
+       :full-body {:desc "full body"
+                   :replaces #{:body :legs :arms :jacket}}
+       :gloves {:desc "hands"} 
+       :wrists {:desc "wrists"}
+       :arms {:desc "arms"
+              :replaces #{:full-body}} 
+       :cloak {:desc "cloak"} 
+       :necklace {:desc "neck"} 
+       :shirt {:desc "undershirt"}
+       :undergarments {:desc "underwear"} 
+       :right-ring {:desc "right ringfinger"}
+       :left-ring {:desc "left ringfinger"}
+       :socks {:desc "socks"} 
+       :feet {:desc "feet"}}] 
+  (def WIELD-TYPES (reduce
+                     (fn [wps [wt props]]
+                       (let [reps (or (:replaces props) #{})
+                             props (assoc props :replaces (conj reps wt))]
+                         (assoc wps wt props)))
+                     wield-props wield-props)))
+
+;; standard attack properties
+
+(def ATT_NORMAL {:name "normal attack" 
+                 :ASK 1.0 :DSK 0.75 :AST 1.0 
+                 :damage-type :normal})
+(def ATT_KICK {:name "kick attack" 
+               :ASK 0.6 :DSK 0.3 :AST 0.5 
+               :damage-type :impact})
+(def ATT_CLAW {:name "claw attack" 
+               :ASK 0.7 :DSK 0.7 :AST 0.7 
+               :damage-type :normal
+               :hit-verb "claw"})
+(def ATT_BURN {:name "burn attack" 
+               :ASK 0.7 :DSK 0.7 :AST 0.7 
+               :damage-type :fire
+               :hit-verb "burn"})
+(def ATT_ZAP {:name "zap attack" 
+               :ASK 0.7 :DSK 0.7 :AST 0.7 
+               :damage-type :lightning
+               :hit-verb "zap"})
+
+(def ATT_BITE {:name "bite attack" 
+               :hit-verb "bite" 
+               :ASK 1.0 :DSK 0.2 :AST 1.0   ;; low dsk - can't block with a bite!
+               :damage-type :normal})
+
+(def ATT_POISON_BITE {:name "poison bite" 
+                      :hit-verb "bite"
+                      :ASK 1.0 :DSK 0.2 :AST 0.75 
+                      :damage-type :normal
+                      :damage-effect "poisoned"})
+
+(def ATT_SWORD {:name "sword" 
+                :ASK 1.2 :DSK 1.0 :AST 1.2 
+                :damage-type :normal 
+                :wield-types [:right-hand :left-hand]})
+(def ATT_AXE {:name "axe" 
+              :ASK 1.0 :DSK 0.5 :AST 1.5 
+              :damage-type :normal 
+              :wield-types [:right-hand :left-hand]})
+(def ATT_MACE {:name "mace" 
+               :ASK 1.0 :DSK 0.5 :AST 1.3 
+               :damage-type :impact 
+               :wield-types [:right-hand :left-hand]})
+(def ATT_CLUB {:name "club" 
+               :hit-verb "bash" 
+               :ASK 0.7 :DSK 0.4 :AST 1.0 
+               :damage-type :impact 
+               :wield-types [:right-hand :left-hand]})
+(def ATT_DAGGER {:name "dagger"
+                 :hit-verb "stab"
+                 :ASK 1.2 :DSK 0.8 :AST 0.8 
+                 :damage-type :normal 
+                 :wield-types [:right-hand :left-hand]})
+
+(defn unwield 
+  "Unwield a single item. The item remains in the actors inventory."
+  ([game actor item]
+    (update-thing game (dissoc item :wielded))))
+
+(defn unwield-items
+  "Unwields all items that satisfy a specific predicate"
+  ([game actor removal-pred]
+    (let [items-to-unwield (filter removal-pred (contents game actor))]
+      ;; (println (str "unwielding: " (seq items-to-unwield)))
+      (reduce
+        (fn [game item]      
+          (unwield game actor item))
+        game
+        items-to-unwield))))
+
+(defn wield
+  "Wields/wears an item in a specific slot. Removes other items in the same / overlapping slots."
+  ([game actor item wt]
+    (as-> game game
+          (unwield-items game actor #((:replaces (WIELD-TYPES wt)) (:wielded %)))
+          (update-thing game (assoc item :wielded wt)))))
+
+(defn get-wielded 
+  "Returns the item that is wielded in particular position, or nil if not found."
+  ([actor wield-type]
+    (first (filter #((:replaces (WIELD-TYPES wield-type)) (:wielded %)) (contents actor)))))

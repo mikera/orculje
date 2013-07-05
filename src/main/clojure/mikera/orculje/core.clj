@@ -1,11 +1,13 @@
 (ns mikera.orculje.core
   (:use mikera.cljutils.error)
+  (:use mikera.cljutils.vectors)
   (:use mikera.orculje.util)
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand Maths])
   (:import [mikera.orculje Finder])
   (:require [mikera.orculje.engine :as engine])
-  (:require [mikera.cljutils.find :as find]))
+  (:require [mikera.cljutils.find :as find])
+  (:require [mikera.cljutils.loops :refer [dovec]]))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
@@ -26,6 +28,10 @@
    :can-stack? {:desc "A (fn [a b]...) that returns true if a can stack with b"}
    :stack-fn {:desc "A (fn [a b]...) that returns a combined stack of a and b"}})
 
+(def MODIFIER-SPECIAL-PROPERTIES
+  {:key "Keyword indicating the property that the modifier affects"
+   :when-effective "(fn [mod parent child] ...) that returns true when the modifier should be effective"})
+
 ;; =======================================================
 ;; location handling
 
@@ -35,27 +41,31 @@
     (instance? mikera.orculje.engine.Location loc)))
 
 (defn loc-within? 
-  ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
+  ([^mikera.orculje.engine.Location lmin 
+    ^mikera.orculje.engine.Location lmax 
     ^mikera.orculje.engine.Location a]
     (and (>= (.x a) (.x lmin)) (<= (.x a) (.x lmax))
          (>= (.y a) (.y lmin)) (<= (.y a) (.y lmax))
          (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
 
 (defn loc-bound 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax 
-    ^mikera.orculje.engine.Location a]
-    (engine/->Location (max (.x lmin) (min (.x a) (.x lmax)))
-                       (max (.y lmin) (min (.y a) (.y lmax)))
-                       (max (.z lmin) (min (.z a) (.z lmax))))))
+  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location lmin 
+                                    ^mikera.orculje.engine.Location lmax 
+                                    ^mikera.orculje.engine.Location a]
+    (engine/->Location (int (max (.x lmin) (min (.x a) (.x lmax))))
+                       (int (max (.y lmin) (min (.y a) (.y lmax))))
+                       (int (max (.z lmin) (min (.z a) (.z lmax)))))))
 
 (defn rand-loc 
-  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location lmin ^mikera.orculje.engine.Location lmax]
+  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location lmin 
+                                   ^mikera.orculje.engine.Location lmax]
   (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
                                 (Rand/range (lmin 1) (lmax 1))
                                 (Rand/range (lmin 2) (lmax 2)))]
     cloc))
 
-(defn loc-dist-manhattan [^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+(defn loc-dist-manhattan [^mikera.orculje.engine.Location a 
+                          ^mikera.orculje.engine.Location b]
   (long (+ (Math/abs (- (.x a) (.x b)))
            (Math/abs (- (.y a) (.y b)))
            (Math/abs (- (.z a) (.z b))))))
@@ -110,12 +120,28 @@
 ;; modifier definition
 ;;
 ;; usage: (modifier :SK (+ value (:ST thing) (:global-st-uplift (:globals game))))
-(defmacro modifier [property expr]
-  `(let [key# ~property]
-     {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
-                ~expr)
-      :priority 0
-      :key key#}))
+
+(defn effective-when-wielded [mod parent child]
+  (:wielded child))
+
+(defmacro modifier 
+  ([property expr]
+    `(modifier ~property ~expr nil))
+  ([property expr extra-props]
+    `(let [key# ~property
+           eprops# ~extra-props]
+       (merge 
+         {:mod-fn (fn [~'mod ~'game ~'thing key# ~'value]
+                    ~expr)
+          :priority 0
+          :key key#}
+         eprops#))))
+
+(defmacro wielded-modifier
+  ([property expr]
+    `(modifier ~property ~expr {:when-effective effective-when-wielded}))
+  ([property expr extra-props]
+    `(modifier ~property ~expr (merge ~extra-props {:when-effective effective-when-wielded})))) 
 
 ;; =======================================================
 ;; Thing subsystem
@@ -190,6 +216,8 @@
             (recur (:location (get-thing game l)))))
       (loc? thing)
         thing
+      (not thing)
+        (error "nil thing passed to location!") 
       :else 
         (loc thing))))
 
@@ -342,11 +370,14 @@
     (let [child-id (or (:id child) (error "child has no ID! : " child))]
       (reduce
         (fn [parent mod]
-          (let [k (or (:key mod) (error "modifier has no :key " mod))
-                all-mods (:modifiers parent)
-                key-mods (k all-mods)
-                new-mod (assoc mod :source child-id)]
-            (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods)))))
+          (let [when-effective (:when-effective mod)]
+            (if (or (not when-effective) (when-effective mod parent child))
+              (let [k (or (:key mod) (error "modifier has no :key " mod))
+                    all-mods (:modifiers parent)
+                    key-mods (k all-mods)
+                    new-mod (assoc mod :source child-id)]
+                (assoc parent :modifiers (assoc all-mods k (cons new-mod key-mods))))
+              parent)))
         parent
         pmods))))
 

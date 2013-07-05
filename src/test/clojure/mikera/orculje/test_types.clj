@@ -4,7 +4,10 @@
   (:import [clojure.lang Seqable]) 
   (:import [java.util Map]) 
   (:require [clojure.main])
-  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]]))
+  (:require [clojure.core.typed :refer [ann inst cf fn> pfn> check-ns ann-form ann-datatype def-alias tc-ignore override-method]])
+  )
+
+#_(do
 
 (def-alias Location mikera.orculje.engine.Location)
 (def-alias Location? (U nil Location))
@@ -14,11 +17,12 @@
 (def-alias Game? (U nil Game))
 (def-alias Properties Any)
 
-(ann clojure.core/*unchecked-math* Boolean)
+(ann ^:nocheck clojure.core/*unchecked-math* Boolean)
 
-(ann-datatype mikera.orculje.engine.Location [x :- Integer
-                                              y :- Integer
-                                              z :- Integer])
+(ann-datatype mikera.orculje.engine.Location [x :- int
+                                              y :- int
+                                              z :- int])
+
 
 (ann mikera.orculje.core/SPECIAL-PROPERTIES Map)
 
@@ -80,8 +84,11 @@
 ;;(ann foo [Any -> Number])
 ;; (defn foo [x] "Hello")
 
-
 ;;(deftest test-check-ns
-;;  (is ))
+;;  (is 
+;;    (check-ns 'mikera.orculje.core)
+;;    ))
 
-;; (check-ns 'mikera.orculje.core)
+(check-ns 'mikera.orculje.core)
+
+)
