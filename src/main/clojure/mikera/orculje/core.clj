@@ -24,6 +24,7 @@
   {:id {:desc "Long ID of a thing. Must exist whenever a thing is present in a Game"}
    :location {:desc "Defines the location of a thing. Can be a Long ID or Location"}
    :name {:desc "The name of a thing."}
+   :things {:desc "A vector of child Things. Can be nil."}
    :modifiers {:desc "Defines the current modifiers active on a thing."}
    :number {:desc "Defined the number of things in a stack"}
    :can-stack? {:desc "A (fn [a b]...) that returns true if a can stack with b"}
