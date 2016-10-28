@@ -260,9 +260,9 @@
   ([game]
     (let [tm (:thing-map game)]
       (loop [max (int 1000)]
-        (let [id (Long. (long (Rand/d max)))]
+        (let [id (Long/valueOf (Rand/d max))]
           (if (tm id)
-            (recur (* 2 max))
+            (recur (* 3 max))
             id))))))
 
 (defn get-tile
