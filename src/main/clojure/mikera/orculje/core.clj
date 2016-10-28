@@ -294,7 +294,7 @@
   ([game]
     (vals (:thing-map game)))
   ([game pred]
-    (find/eager-filter pred (all-things game))))
+    (filter pred (all-things game))))
 
 ;; =======================================================
 ;; query features
@@ -334,7 +334,7 @@
   ([game ob potential-stack-vector]
     (if-let [can-stack? (:can-stack? ob)]
       (let [sc #(can-stack? ob %)
-            stack-target (find/find-first sc potential-stack-vector)]
+            stack-target (when potential-stack-vector (find/find-first sc potential-stack-vector))]
         (if stack-target
           (as-> game game
                 (stack-thing game ob stack-target)
@@ -442,7 +442,7 @@
              (reduce 
                (fn [pmods [k mods]]
                  (assoc pmods k
-                        (doall (find/eager-filter filt mods))))
+                        (filterv filt mods)))
                pmods
                pmods)))
     parent))

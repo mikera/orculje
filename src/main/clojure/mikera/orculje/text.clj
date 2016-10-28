@@ -114,16 +114,19 @@
         (let [bname (base-name game thing)]
           (str (if (starts-with-vowel? bname) "an " "a ") bname))))) 
 
-(defn and-string [ss]
-  (let [ss (find/eager-filter identity ss)
-        c (count ss)]
-    (cond 
-      (== c 0) nil
-      (== c 1) (first ss)
-      (== c 2) (str (first ss) " and " (second ss))
-      :else (str
-              (apply str (map #(str % ", ") (take (- c 2) ss)))
-              (and-string (drop (- c 2) ss))))))
+(defn and-string 
+  "Creates a string joining the individual elements in a `and` phrase, e.g.
+   `axe, stool and bottle`"
+  ([ss]
+    (let [ss (filter identity ss)
+          c (count ss)]
+      (cond 
+        (== c 0) nil
+        (== c 1) (first ss)
+        (== c 2) (str (first ss) " and " (second ss))
+        :else (str
+                (apply str (map #(str % ", ") (take (- c 2) ss)))
+                (and-string (drop (- c 2) ss)))))))
 
 (defn str-add [s a]
   (str 
