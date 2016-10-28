@@ -1,5 +1,6 @@
 (ns mikera.orculje.engine
   (:use [mikera.orculje util])
+  (:require [mikera.cljutils.error :refer [error]])
   (:import [mikera.engine PersistentTreeGrid]))
 
 (set! *warn-on-reflection* true)
@@ -67,13 +68,11 @@
       (str [(.x this) (.y this) (.z this)]))) 
 
 (defrecord Game [^PersistentTreeGrid world    ;; grid of terrain
-                 ^PersistentTreeGrid things   ;; grid of things (contains vectors)
-                 thing-map                    ;; map of id -> thing
+                 ^PersistentTreeGrid things   ;; grid of [Vector of Things] for each location
+                 thing-map                    ;; map of id -> Thing
                  ])
 
 (defrecord Thing [])
 
 ;; ======================================================
 ;; data type functions
-
-

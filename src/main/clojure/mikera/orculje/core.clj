@@ -5,6 +5,7 @@
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand Maths])
   (:import [mikera.orculje Finder])
+  (:import [mikera.orculje.engine Game Location Thing])
   (:require [mikera.orculje.engine :as engine])
   (:require [mikera.cljutils.find :as find])
   (:require [mikera.cljutils.loops :refer [dovec]]))
@@ -38,34 +39,34 @@
 (defn loc? 
   "Returns true if loc is a valid Location object" 
   ([loc]
-    (instance? mikera.orculje.engine.Location loc)))
+    (instance? Location loc)))
 
 (defn loc-within? 
-  ([^mikera.orculje.engine.Location lmin 
-    ^mikera.orculje.engine.Location lmax 
-    ^mikera.orculje.engine.Location a]
+  ([^Location lmin 
+    ^Location lmax 
+    ^Location a]
     (and (>= (.x a) (.x lmin)) (<= (.x a) (.x lmax))
          (>= (.y a) (.y lmin)) (<= (.y a) (.y lmax))
          (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
 
 (defn loc-bound 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location lmin 
-                                    ^mikera.orculje.engine.Location lmax 
-                                    ^mikera.orculje.engine.Location a]
+  ^Location ([^Location lmin 
+                                    ^Location lmax 
+                                    ^Location a]
     (engine/->Location (int (max (.x lmin) (min (.x a) (.x lmax))))
                        (int (max (.y lmin) (min (.y a) (.y lmax))))
                        (int (max (.z lmin) (min (.z a) (.z lmax)))))))
 
 (defn rand-loc 
-  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location lmin 
-                                   ^mikera.orculje.engine.Location lmax]
+  ^Location [^Location lmin 
+                                   ^Location lmax]
   (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
                                 (Rand/range (lmin 1) (lmax 1))
                                 (Rand/range (lmin 2) (lmax 2)))]
     cloc))
 
-(defn loc-dist-manhattan [^mikera.orculje.engine.Location a 
-                          ^mikera.orculje.engine.Location b]
+(defn loc-dist-manhattan [^Location a 
+                          ^Location b]
   (long (+ (Math/abs (- (.x a) (.x b)))
            (Math/abs (- (.y a) (.y b)))
            (Math/abs (- (.z a) (.z b))))))
@@ -78,42 +79,42 @@
     (engine/->Location x y z)))
 
 (defn loc-add 
-  ([^mikera.orculje.engine.Location a ^mikera.orculje.engine.Location b]
+  ([^Location a ^Location b]
     (engine/->Location (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
-  ([^mikera.orculje.engine.Location a ^long x ^long y ^long z]
+  ([^Location a ^long x ^long y ^long z]
     (engine/->Location (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
 
 
 (defn loc-inc 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a]
+  ^Location ([^Location a]
     (engine/->Location (inc (.x a)) (inc (.y a)) (inc (.z a)))))
 
 
 (defn loc-dec 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a]
+  ^Location ([^Location a]
     (engine/->Location (dec (.x a)) (dec (.y a)) (dec (.z a)))))
 
 (defn loc-min 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a 
-                                    ^mikera.orculje.engine.Location b]
+  ^Location ([^Location a 
+                                    ^Location b]
     (engine/->Location (min (.x a) (.x b)) (min (.y a) (.y b)) (min (.z a) (.z b)))))
 
 (defn loc-max 
-  ^mikera.orculje.engine.Location ([^mikera.orculje.engine.Location a 
-                                    ^mikera.orculje.engine.Location b]
+  ^Location ([^Location a 
+                                    ^Location b]
     (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
-  ^mikera.orculje.engine.Location [^mikera.orculje.engine.Location from-loc 
-                                   ^mikera.orculje.engine.Location to-loc]
-  (mikera.orculje.engine.Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
+  ^Location [^Location from-loc 
+                                   ^Location to-loc]
+  (Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
                                    (int (Maths/sign (- (.y to-loc) (.y from-loc))))
                                    (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
 
 (defn location-towards 
   "Gets a location one square closer to the target location"
-  (^mikera.orculje.engine.Location [^mikera.orculje.engine.Location from-loc 
-                                   ^mikera.orculje.engine.Location to-loc]
+  (^Location [^Location from-loc 
+                                   ^Location to-loc]
     (loc-add from-loc (direction from-loc to-loc))))
 
 ;; =======================================================
@@ -205,13 +206,13 @@
 
 (defn location 
   "Gets the location of a thing."
-  (^mikera.orculje.engine.Location [game thing]
+  (^Location [game thing]
     (cond 
       (number? thing)
         (location game (get-thing game thing))
       (thing? thing)
         (loop [l (or (:location (get-thing game thing)) "Thing has no location!")]
-          (if (instance? mikera.orculje.engine.Location l)
+          (if (instance? Location l)
             l
             (recur (:location (get-thing game l)))))
       (loc? thing)
@@ -243,7 +244,7 @@
 ;; Game subsystem
 
 (defn game? [game]
-  (instance? mikera.orculje.engine.Game game))
+  (instance? Game game))
 
 (defn empty-game 
   "Creates a new, empty game object"
@@ -266,23 +267,23 @@
 
 (defn get-tile
   "Returns the terrain in a given location"
-  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
+  ([^Game game ^Location loc]
     (.get ^PersistentTreeGrid (.world game) (.x loc) (.y loc) (.z loc)))
-  ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
+  ([^Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.world game) (int x) (int y) (int z))))
 
 (defn set-tile
   "Sets the terrain in a given location"
-  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc value]
+  ([^Game game ^Location loc value]
     (assoc game :world (.set ^PersistentTreeGrid (.world game) (.x loc) (.y loc) (.z loc) value)))
-  ([^mikera.orculje.engine.Game game x y z value]
+  ([^Game game x y z value]
     (assoc game :world (.set ^PersistentTreeGrid (.world game) (int x) (int y) (int z) value))))
 
 (defn get-things
   "Returns a vector of things in a given location, or nil if none found" 
-  ([^mikera.orculje.engine.Game game ^mikera.orculje.engine.Location loc]
+  ([^Game game ^Location loc]
     (.get ^PersistentTreeGrid (.things game) (.x loc) (.y loc) (.z loc)))
-  ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
+  ([^Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.things game) (int x) (int y) (int z))))
 
 (defn get-thing [game id-or-thing]
@@ -341,8 +342,8 @@
                 (assoc game :last-added-id (:id stack-target))))))))
 
 (defn add-thing-to-map
-  [^mikera.orculje.engine.Game game 
-   ^mikera.orculje.engine.Location loc 
+  [^Game game 
+   ^Location loc 
    ^mikera.orculje.engine.Thing thing]
   (let [cur-things (or (get-things game loc) [])]
     ;; TODO: error if thing id already present
@@ -388,7 +389,7 @@
       (add-child-modifiers parent child pmods)
       parent)))
 
-(defn add-thing-to-thing ^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game parent thing]
+(defn add-thing-to-thing ^Game [^Game game parent thing]
   (let [id (or (:id thing) (new-id game))
         thing-map (:thing-map game)
         _ (when (thing-map id) (error "Thing already present!!"))
@@ -413,21 +414,21 @@
                 (valid (:things (get-thing game parent)))
                 game))))))
 
-(defn add-thing ^mikera.orculje.engine.Game [game loc thing]
+(defn add-thing ^Game [game loc thing]
   (or thing (error "Can't add a nil thing!!"))
-  (if (instance? mikera.orculje.engine.Location loc)
+  (if (instance? Location loc)
     (add-thing-to-map game loc thing)
     (add-thing-to-thing game loc thing)))
 
 (defn remove-thing-from-map 
-  ^mikera.orculje.engine.Game
-  [^mikera.orculje.engine.Game game 
+  ^Game
+  [^Game game 
    ^mikera.orculje.engine.Thing thing]
   (let [thing-map (:thing-map game)
         things ^PersistentTreeGrid (:things game)
         id (or (:id thing) (error "Thing has no ID!"))
         thing (or (thing-map id) (error "Can't find thing! " id))
-        ^mikera.orculje.engine.Location loc (or (:location thing) (error "Thing is not on map!"))
+        ^Location loc (or (:location thing) (error "Thing is not on map!"))
         x (.x loc) y (.y loc) z (.z loc)
         thing-vec (.get things x y z)
         reduced-thing-vec (remove-from-vector thing thing-vec)]
@@ -470,7 +471,7 @@
   ([game thing]
     (if-let [thing (get-thing game thing)]
       (let [loc (or (:location thing) (error "Thing is not present!"))]
-        (if (instance? mikera.orculje.engine.Location loc)
+        (if (instance? Location loc)
           (remove-thing-from-map game thing)
           (remove-thing-from-thing game loc thing)))
       game))
@@ -485,14 +486,14 @@
         :else 
           (error "Trying to remove more things [" number "] than exist [" num "]")))))
 
-;(defn move-thing [^mikera.orculje.engine.Game game 
+;(defn move-thing [^Game game 
 ;                  ^mikera.orculje.engine.Thing thing 
-;                  ^mikera.orculje.engine.Location loc]
+;                  ^Location loc]
 ;  (let [thing-map (:thing-map game)
 ;        things ^PersistentTreeGrid (:things game)
 ;        id (or (:id thing) (error "Thing has no ID!"))
 ;        thing (or (thing-map id) (error "Can't find thing! " id))
-;        ^mikera.orculje.engine.Location cloc (or (:location thing) (error "Thing is not on map!"))
+;        ^Location cloc (or (:location thing) (error "Thing is not on map!"))
 ;        cx (.x cloc) cy (.y cloc) cz (.z cloc)
 ;        nx (.x loc) ny (.y loc) nz (.z loc)
 ;        thing-vec (.get things cx cy cz)
@@ -526,7 +527,7 @@
     (as-> game game
       (update-thing game new-parent))))
 
-(defn- update-thing-within-map [game ^mikera.orculje.engine.Location tloc changed-id changed-thing]
+(defn- update-thing-within-map [game ^Location tloc changed-id changed-thing]
   (let [x (.x tloc) y (.y tloc) z (.z tloc)
         ^PersistentTreeGrid grid (:things game) 
         lconts (or (.get grid x y z) (error "Map location has no things?!?"))
@@ -539,7 +540,7 @@
 (defn update-thing
   "Updates a thing within the game. Thing must have valid ID and location
    Warning: must not break validation rules, children must be correct and complete etc." 
-  (^mikera.orculje.engine.Game [^mikera.orculje.engine.Game game 
+  (^Game [^Game game 
                                 ^mikera.orculje.engine.Thing changed-thing]
     (let [id (or (:id changed-thing) (error "No valid ID on updated thing"))
           old-thing (get-thing game changed-thing)
@@ -597,10 +598,10 @@
 ;; finder functions
 
 (defn find-nearest-thing
-  [^mikera.orculje.engine.Game game pred ^mikera.orculje.engine.Location loc-or-thing range]
-  (let [^mikera.orculje.engine.Location cloc (location game loc-or-thing)
-        ^mikera.orculje.engine.Location loc1 (loc-add cloc (loc (- range) (- range) 0))
-        ^mikera.orculje.engine.Location loc2 (loc-add cloc (loc range range 0))
+  [^Game game pred ^Location loc-or-thing range]
+  (let [^Location cloc (location game loc-or-thing)
+        ^Location loc1 (loc-add cloc (loc (- range) (- range) 0))
+        ^Location loc2 (loc-add cloc (loc range range 0))
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
         x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
         ^PersistentTreeGrid thing-grid (:things game)
@@ -623,13 +624,13 @@
     @best-thing))
 
 (defn find-things
-  [^mikera.orculje.engine.Game game pred loc-or-thing loc2-or-range]
-  (let [^mikera.orculje.engine.Location loc1 (location game loc-or-thing)
+  [^Game game pred loc-or-thing loc2-or-range]
+  (let [^Location loc1 (location game loc-or-thing)
         use-range? (number? loc2-or-range)
-        ^mikera.orculje.engine.Location loc2 (if use-range? 
+        ^Location loc2 (if use-range? 
                                                (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) 
                                                loc2-or-range)
-        ^mikera.orculje.engine.Location loc1 (if use-range? 
+        ^Location loc1 (if use-range? 
                                                (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0))
                                                loc1)
         x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
@@ -666,7 +667,7 @@
   (valid (loc? (location game thing)))
   (if-let [loc (:location thing)]
     (if (loc? loc)
-      (let [^mikera.orculje.engine.Location loc loc]
+      (let [^Location loc loc]
         (valid 
           (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))
           (str "Cannot find thing within map contents vector for location.")))
@@ -680,7 +681,7 @@
   (validate-modifiers game thing))
 
 (defn validate-game [game]
-  (valid (instance? mikera.orculje.engine.Game game))
+  (valid (instance? Game game))
   (let [world (:world game)
         things (:things game)
         thing-map (:thing-map game)]
