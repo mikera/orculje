@@ -164,7 +164,7 @@
 (defn thing? 
   "Returns true if t is a Thing" 
   ([t]
-    (instance? mikera.orculje.engine.Thing t)))
+    (instance? Thing t)))
 
 (defn get-modified-value [game thing modifiers k unmodified-value]
   (if-let [mods (seq (k modifiers))]
@@ -231,7 +231,7 @@
         (loc thing))))
 
 (defn parent 
-  "gets the parent of a thing"
+  "Gets the parent of a thing. Returns nil if the Thing has no parent."
   ([game thing]
     (let [thing (get-thing game thing)
           l (:location thing)] 
@@ -240,6 +240,7 @@
         nil))))
 
 (defn contents 
+  "Gets the contents (children) of a Thing. Used for inventory, effects etc."
   ([thing]
     (:things thing))
   ([game thing]
@@ -355,7 +356,7 @@
 (defn add-thing-to-map
   [^Game game 
    ^Location loc 
-   ^mikera.orculje.engine.Thing thing]
+   ^Thing thing]
   (let [cur-things (or (get-things game loc) [])]
     ;; TODO: error if thing id already present
     (or
@@ -425,50 +426,56 @@
                 (valid (:things (get-thing game parent)))
                 game))))))
 
-(defn add-thing ^Game [game loc thing]
+(defn add-thing 
+  "Adds a Thing to a place in a game. Place may be either a Location or another Thing"
+  (^Game [game place thing]
   (or thing (error "Can't add a nil thing!!"))
-  (if (instance? Location loc)
-    (add-thing-to-map game loc thing)
-    (add-thing-to-thing game loc thing)))
+  (if (instance? Location place)
+    (add-thing-to-map game place thing)
+    (add-thing-to-thing game place thing))))
 
 (defn remove-thing-from-map 
-  ^Game
-  [^Game game 
-   ^mikera.orculje.engine.Thing thing]
-  (let [thing-map (:thing-map game)
-        things ^PersistentTreeGrid (:things game)
-        id (or (:id thing) (error "Thing has no ID!"))
-        thing (or (thing-map id) (error "Can't find thing! " id))
-        ^Location loc (or (:location thing) (error "Thing is not on map!"))
-        x (.x loc) y (.y loc) z (.z loc)
-        thing-vec (.get things x y z)
-        reduced-thing-vec (remove-from-vector thing thing-vec)]
-    (as-> game game
-      (assoc game :things (.set things x y z reduced-thing-vec))
-      (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id)))))
+  "Removes a Thing from the map. Throws an error of not on the map."
+  (^Game [^Game game ^Thing thing]
+    (let [thing-map (:thing-map game)
+          things ^PersistentTreeGrid (:things game)
+          id (or (:id thing) (error "Thing has no ID!"))
+          thing (or (thing-map id) (error "Can't find thing! " id))
+          ^Location loc (or (:location thing) (error "Thing is not on map!"))
+          x (.x loc) y (.y loc) z (.z loc)
+          thing-vec (.get things x y z)
+          reduced-thing-vec (remove-from-vector thing thing-vec)]
+      (as-> game game
+        (assoc game :things (.set things x y z reduced-thing-vec))
+        (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id))))))
 
-(defn remove-child-modifiers [parent child-id]
-  (if-let [pmods (:modifiers parent)]
-    (let [filt #(if (= child-id (:source %)) nil %)]
-      (assoc parent :modifiers
-             (reduce 
-               (fn [pmods [k mods]]
-                 (assoc pmods k
-                        (filterv filt mods)))
-               pmods
-               pmods)))
-    parent))
+(defn- remove-child-modifiers 
+  "Removes modifiers from a parent associated with a specific child object."
+  ([parent child-id]
+    (if-let [pmods (:modifiers parent)]
+      (let [filt #(if (= child-id (:source %)) nil %)]
+        (assoc parent :modifiers
+               (reduce 
+                 (fn [pmods [k mods]]
+                   (assoc pmods k
+                          (filterv filt mods)))
+                 pmods
+                 pmods)))
+      parent)))
 
-(defn- remove-child [parent child]
-  (let [thing-id (or (:id child) (error "child has no ID!"))
-        children (or (:things parent) (error "No :things in parent ?!?"))
-        ci (find/find-index #(= (:id %) thing-id) children)
-        new-children (vector-without children ci)]
-    (as-> parent parent 
-       (remove-child-modifiers parent thing-id)
-       (assoc parent :things new-children))))
+(defn- remove-child 
+  "Remove a child from a parent thing. Returns the updated parent Thing.
+   Removes modifiers if necessary."
+  ([^Thing parent ^Thing child]
+    (let [thing-id (or (:id child) (error "child has no ID!"))
+          children (or (:things parent) (error "No :things in parent ?!?"))
+          ci (find/find-index #(= (:id %) thing-id) children)
+          new-children (vector-without children ci)]
+      (as-> parent parent 
+         (remove-child-modifiers parent thing-id)
+         (assoc parent :things new-children)))))
 
-(defn remove-thing-from-thing [game parent thing]
+(defn- remove-thing-from-thing [game parent thing]
   (let [thing-map (:thing-map game)
         parent (or (get-thing game parent) (error "Can't find parent!"))
         thing (or (get-thing game thing) (error "Can't find child thing!"))
@@ -479,6 +486,10 @@
       )))
 
 (defn remove-thing
+  "Removes a Thing from the game. Thing may be on the map or a child of another Thing.
+   An optional number may be provided, in which case the specified number of Things
+   is removed from a stack (up to and including the whole stack).
+   Returns the updated game."
   ([game thing]
     (if-let [thing (get-thing game thing)]
       (let [loc (or (:location thing) (error "Thing is not present!"))]
@@ -521,11 +532,13 @@
 ;      (assoc :thing-map (assoc thing-map id new-thing))
 ;      (assoc :last-added-id id))))
 
-(defn move-thing [game thing loc]
+(defn move-thing 
+  "Moves a Thing to a new place. Place may either be a map Location or a parent Thing"
+  ([game thing place]
   (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
     (as-> game game
           (remove-thing game thing)
-          (add-thing game loc thing))))
+          (add-thing game place thing)))))
 
 (defn- update-thing-within-parent [game parent-id changed-id changed-thing]
   (let [tm (:thing-map game) 
@@ -553,7 +566,7 @@
   "Updates a thing within the game. Thing must have valid ID and location
    Warning: must not break validation rules, children must be correct and complete etc." 
   (^Game [^Game game 
-                                ^mikera.orculje.engine.Thing changed-thing]
+          ^Thing changed-thing]
     (let [id (or (:id changed-thing) (error "No valid ID on updated thing"))
           old-thing (get-thing game changed-thing)
           l (or (:location old-thing) (error "Thing to be updated has no :location!"))]
@@ -563,8 +576,7 @@
             (update-thing-within-parent game l id changed-thing)
             (update-thing-within-map game l id changed-thing))
           (assoc game :thing-map (assoc (:thing-map game) id changed-thing))
-          (assoc game :last-added-id id)     
-          ))))
+          (assoc game :last-added-id id)))))
 
 (defn default-can-stack? 
   "Default stacking test. Should work for standard item stacks."
