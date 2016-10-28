@@ -19,7 +19,7 @@
 (declare stack-thing)
 
 ;; =======================================================
-;; special properties
+;; special properties for Things
 (def SPECIAL-PROPERTIES 
   {:id {:desc "Long ID of a thing. Must exist whenever a thing is present in a Game"}
    :location {:desc "Defines the location of a thing. Can be a Long ID or Location"}
@@ -666,12 +666,12 @@
   (valid (or (nil? (:things thing)) (vector? (:things thing))))
   (valid (loc? (location game thing)))
   (if-let [loc (:location thing)]
-    (if (loc? loc)
-      (let [^Location loc loc]
+    (if (loc? loc) 
+      (let [^Location loc loc] ;; if the thing is on the map
         (valid 
-          (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))
+          (find/find-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc)))
           (str "Cannot find thing within map contents vector for location.")))
-      (do 
+      (do  ;; if the thing is a child, should resolve to a parent on the map
         (valid (number? loc))
         (valid (loc? (location game thing))))))
   (doseq [child (contents thing)]
@@ -688,8 +688,9 @@
     (valid world)
     (valid things) 
     (valid thing-map (str "No thing map!" game))
-    (doseq [t (vals thing-map)]
-      (validate-game-thing game t))))
+    (doseq [[id thing] thing-map]
+      (valid (= id (:id thing)))
+      (validate-game-thing game thing))))
 
 (defn validate [game]
   "Validates a game, throws an error for any issue"

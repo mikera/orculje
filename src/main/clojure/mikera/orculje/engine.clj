@@ -72,6 +72,8 @@
                  thing-map                    ;; map of id -> Thing
                  ])
 
+;; Thing is a record with a few special fields:
+;; see core/SPECIAL-PROPERTIES for description of special fields that may be set
 (defrecord Thing [])
 
 ;; ======================================================
