@@ -11,7 +11,7 @@
   (:require [mikera.cljutils.loops :refer [dovec]]))
 
 (set! *warn-on-reflection* true)
-(set! *unchecked-math* true)
+(set! *unchecked-math* :warn-on-boxed)
 
 (declare get-thing)
 (declare update-thing)
@@ -42,6 +42,7 @@
     (instance? Location loc)))
 
 (defn loc-within? 
+  "Returns true if the location a is within the given bounds lmin and lmax"
   ([^Location lmin 
     ^Location lmax 
     ^Location a]
@@ -50,26 +51,30 @@
          (>= (.z a) (.z lmin)) (<= (.z a) (.z lmax)))))
 
 (defn loc-bound 
-  ^Location ([^Location lmin 
-                                    ^Location lmax 
-                                    ^Location a]
+  "Returns a location clamped to within the specified bounds"
+  (^Location [^Location lmin 
+              ^Location lmax 
+              ^Location a]
     (engine/->Location (int (max (.x lmin) (min (.x a) (.x lmax))))
                        (int (max (.y lmin) (min (.y a) (.y lmax))))
                        (int (max (.z lmin) (min (.z a) (.z lmax)))))))
 
 (defn rand-loc 
-  ^Location [^Location lmin 
-                                   ^Location lmax]
-  (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
-                                (Rand/range (lmin 1) (lmax 1))
-                                (Rand/range (lmin 2) (lmax 2)))]
-    cloc))
+  "Returns a random location within the given bounds"
+  (^Location [^Location lmin 
+              ^Location lmax]
+    (let [cloc (engine/->Location (Rand/range (lmin 0) (lmax 0))
+                                  (Rand/range (lmin 1) (lmax 1))
+                                  (Rand/range (lmin 2) (lmax 2)))]
+      cloc)))
 
-(defn loc-dist-manhattan [^Location a 
-                          ^Location b]
-  (long (+ (Math/abs (- (.x a) (.x b)))
-           (Math/abs (- (.y a) (.y b)))
-           (Math/abs (- (.z a) (.z b))))))
+(defn loc-dist-manhattan 
+  "Rturns the manhattan distance between two locations."
+  (^long [^Location a 
+          ^Location b]
+    (long (+ (Math/abs (- (.x a) (.x b)))
+             (Math/abs (- (.y a) (.y b)))
+             (Math/abs (- (.z a) (.z b)))))))
 
 (defn loc 
   "Constructs a new Location"
@@ -79,10 +84,11 @@
     (engine/->Location x y z)))
 
 (defn loc-add 
+  "Creates a new location by adding an offset to an existing location"
   ([^Location a ^Location b]
     (engine/->Location (+ (.x a) (.x b)) (+ (.y a) (.y b)) (+ (.z a) (.z b))))
-  ([^Location a ^long x ^long y ^long z]
-    (engine/->Location (+ (.x a) x) (+ (.y a) y) (+ (.z a) z))))
+  ([^Location a ^long dx ^long dy ^long dz]
+    (engine/->Location (+ (.x a) dx) (+ (.y a) dy) (+ (.z a) dz))))
 
 
 (defn loc-inc 
@@ -105,11 +111,12 @@
     (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
-  ^Location [^Location from-loc 
-                                   ^Location to-loc]
-  (Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
-                                   (int (Maths/sign (- (.y to-loc) (.y from-loc))))
-                                   (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
+  "Gets a direction vector in the direction of from-loc to to-loc"
+  (^Location [^Location from-loc 
+              ^Location to-loc]
+    (Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
+               (int (Maths/sign (- (.y to-loc) (.y from-loc))))
+               (int (Maths/sign (- (.z to-loc) (.z from-loc)))))))
 
 (defn location-towards 
   "Gets a location one square closer to the target location"
@@ -237,8 +244,11 @@
   ([game thing]
     (contents (get-thing game thing))))
 
-(defn get-number [thing]
-  (or (:number thing) 1))
+(defn get-number 
+  "Gets the number associated with a Thing. Usually 1, but may be more if the Thing represents
+   a stack of items."
+  (^long [thing]
+    (long (or (:number thing) 1))))
 
 ;; =======================================================
 ;; Game subsystem
@@ -476,7 +486,8 @@
           (remove-thing-from-thing game loc thing)))
       game))
   ([game thing number]
-    (let [thing (get-thing game thing)
+    (let [number (long number)
+          thing (get-thing game thing)
           num (get-number thing)]
       (cond 
         (== num number)
@@ -598,7 +609,7 @@
 ;; finder functions
 
 (defn find-nearest-thing
-  [^Game game pred ^Location loc-or-thing range]
+  [^Game game pred ^Location loc-or-thing ^long range]
   (let [^Location cloc (location game loc-or-thing)
         ^Location loc1 (loc-add cloc (loc (- range) (- range) 0))
         ^Location loc2 (loc-add cloc (loc range range 0))
@@ -616,7 +627,7 @@
                             dz (- (long z) (.z cloc))
                             dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
                         ;;(println (str "found" v " at " (loc x y z)))
-                        (when (< dist2 @best-distance-squared)
+                        (when (< dist2 (long @best-distance-squared))
                           (reset! best-distance-squared dist2)
                           (reset! best-thing v))))))
         ^Finder finder (Finder. find-fn)]
@@ -624,29 +635,32 @@
     @best-thing))
 
 (defn find-things
-  [^Game game pred loc-or-thing loc2-or-range]
-  (let [^Location loc1 (location game loc-or-thing)
-        use-range? (number? loc2-or-range)
-        ^Location loc2 (if use-range? 
-                                               (loc-add loc1 (loc loc2-or-range loc2-or-range 0)) 
-                                               loc2-or-range)
-        ^Location loc1 (if use-range? 
-                                               (loc-add loc1 (loc (- loc2-or-range) (- loc2-or-range) 0))
-                                               loc1)
-        x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
-        x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
-        ^PersistentTreeGrid thing-grid (:things game)
-        found-things (atom nil)
-        find-fn (fn [x y z vs]
-                  ;; (println (str x "," y "," z vs))
-                  (dovec [v vs]
-                    ;;(println (str x "," y "," z " = " (str v)))
-                    (when (pred v)
-                      ;;(println "found!!")
-                      (reset! found-things (cons v @found-things)))))
-        ^Finder finder (Finder. find-fn)]
-    (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
-    @found-things))
+  "Finds things on the map that satisfy a given predicate.
+   Base location may be either a location or Thing ID
+   Either a long range or a range vector may be provided"
+  ([^Game game pred loc-or-thing loc2-or-range]
+    (let [^Location loc1 (location game loc-or-thing)
+          use-range? (number? loc2-or-range)
+          ^Location loc2 (if use-range? 
+                           (loc-add loc1 (loc (long loc2-or-range) (long loc2-or-range) 0)) 
+                           loc2-or-range)
+          ^Location loc1 (if use-range? 
+                           (loc-add loc1 (loc (- (long loc2-or-range)) (- (long loc2-or-range)) 0))
+                           loc1)
+          x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
+          x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
+          ^PersistentTreeGrid thing-grid (:things game)
+          found-things (atom nil)
+          find-fn (fn [x y z vs]
+                    ;; (println (str x "," y "," z vs))
+                    (dovec [v vs]
+                      ;;(println (str x "," y "," z " = " (str v)))
+                      (when (pred v)
+                        ;;(println "found!!")
+                        (reset! found-things (cons v @found-things)))))
+          ^Finder finder (Finder. find-fn)]
+      (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
+      @found-things)))
 
 
 
