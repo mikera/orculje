@@ -2,11 +2,11 @@
   (:use mikera.cljutils.error)
   (:use mikera.cljutils.vectors)
   (:use mikera.orculje.util)
+  (:require [mikera.orculje.engine :as engine])
   (:import [mikera.engine PersistentTreeGrid])
   (:import [mikera.util Rand Maths])
   (:import [mikera.orculje Finder])
   (:import [mikera.orculje.engine Game Location Thing])
-  (:require [mikera.orculje.engine :as engine])
   (:require [mikera.cljutils.find :as find])
   (:require [mikera.cljutils.loops :refer [dovec]]))
 
