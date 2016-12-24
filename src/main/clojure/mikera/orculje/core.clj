@@ -107,8 +107,7 @@
     (engine/->Location (min (.x a) (.x b)) (min (.y a) (.y b)) (min (.z a) (.z b)))))
 
 (defn loc-max 
-  ^Location ([^Location a 
-                                    ^Location b]
+  ^Location ([^Location a ^Location b]
     (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
