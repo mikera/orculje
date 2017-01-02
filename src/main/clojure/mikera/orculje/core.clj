@@ -532,7 +532,8 @@
 ;      (assoc :last-added-id id))))
 
 (defn move-thing 
-  "Moves a Thing to a new place. Place may either be a map Location or a parent Thing"
+  "Moves a Thing to a new place. Place may either be a map Location or a parent Thing.
+   thing data may be updated for general purpose attributes."
   ([game thing place]
   (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
     (as-> game game
