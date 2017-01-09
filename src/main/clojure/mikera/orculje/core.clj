@@ -353,25 +353,27 @@
                 (assoc game :last-added-id (:id stack-target))))))))
 
 (defn add-thing-to-map
-  [^Game game 
+  "Adds a thing to a map location.
+   Updates :things and :thing-map "
+  ([^Game game 
    ^Location loc 
    ^Thing thing]
-  (let [cur-things (or (get-things game loc) [])]
-    ;; TODO: error if thing id already present
-    (or
-      (try-stack game thing cur-things)
-      (let [^PersistentTreeGrid cur-grid (:things game)
-            id (or (:id thing) (new-id game))
-            thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
-            _ (when (thing-map id) (error "Thing already present!!"))
-            new-thing (as-> thing thing
-                            (assoc thing :id id)
-                            (assoc thing :location loc))
-            new-things (conj cur-things new-thing)]
-        (as-> game game
-              (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-              (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
-              (assoc game :last-added-id id))))))
+    (let [cur-things (or (get-things game loc) [])]
+      ;; TODO: error if thing id already present
+      (or
+        (try-stack game thing cur-things)
+        (let [^PersistentTreeGrid cur-grid (:things game)
+              id (or (:id thing) (new-id game))
+              thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
+              _ (when (thing-map id) (error "Thing already present!!"))
+              new-thing (as-> thing thing
+                              (assoc thing :id id)
+                              (assoc thing :location loc))
+              new-things (conj cur-things new-thing)]
+          (as-> game game
+                (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
+                (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
+                (assoc game :last-added-id id)))))))
 
 (defn add-child-modifiers 
   ([parent child]
@@ -532,13 +534,15 @@
 ;      (assoc :last-added-id id))))
 
 (defn move-thing 
-  "Moves a Thing to a new place. Place may either be a map Location or a parent Thing.
-   thing data may be updated for general purpose attributes."
+  "Moves a Thing to a new place. 
+   Initial thing must be present on map.
+   Target place may either be a map Location or a parent Thing.
+   Performs movement only: other thing data will be as before."
   ([game thing place]
-  (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
-    (as-> game game
-          (remove-thing game thing)
-          (add-thing game place thing)))))
+    (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
+      (as-> game game
+            (remove-thing game thing)
+            (add-thing game place thing)))))
 
 (defn- update-thing-within-parent [game parent-id changed-id changed-thing]
   (let [tm (:thing-map game) 
