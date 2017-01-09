@@ -216,9 +216,10 @@
   (^Location [game thing]
     (cond 
       (number? thing)
-        (location game (get-thing game thing))
+        (let [^Thing thing (or (get-thing game thing) (error "Thing has no location!"))]
+          (location game thing))
       (thing? thing)
-        (loop [l (or (:location (get-thing game thing)) "Thing has no location!")]
+        (loop [l (or (:location (get-thing game thing)) (error "Thing has no location!"))]
           (if (instance? Location l)
             l
             (recur (:location (get-thing game l)))))
@@ -227,7 +228,7 @@
       (not thing)
         (error "nil thing passed to location!") 
       :else 
-        (loc thing))))
+        (error "Can't work out location for: " thing))))
 
 (defn parent 
   "Gets the parent of a thing. Returns nil if the Thing has no parent."
@@ -264,7 +265,15 @@
       (PersistentTreeGrid/EMPTY) ;; no world terrain
       (PersistentTreeGrid/EMPTY) ;; no things
       {}                         ;; no ids map to things
-    )))
+    ))
+  ([params]
+    (engine/->Game
+      (PersistentTreeGrid/EMPTY) ;; no world terrain
+     (PersistentTreeGrid/EMPTY)  ;; no things
+     {}                          ;; no ids map to things
+     nil                         ;; no metadata
+     params                      ;; additional data
+     )))
 
 (defn new-id 
   "Creates a new, unique Long ID for a given game"
