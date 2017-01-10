@@ -242,8 +242,10 @@
 ;; =======================================================
 ;; Game subsystem
 
-(defn game? [game]
-  (instance? mikera.orculje.engine.Game game))
+(defn game? 
+  "Predicate that returns true if the parameter is a Game instance"
+  ([game]
+    (instance? mikera.orculje.engine.Game game)))
 
 (defn empty-game 
   "Creates a new, empty game object"
@@ -285,16 +287,19 @@
   ([^mikera.orculje.engine.Game game ^long x ^long y ^long z]
     (.get ^PersistentTreeGrid (.things game) (int x) (int y) (int z))))
 
-(defn get-thing [game id-or-thing]
-  (let [id (if (number? id-or-thing) id-or-thing (:id id-or-thing))]
-    ((:thing-map game) id)))
+(defn get-thing 
+  "Gets the latest version of a Thing from the game.
+   Can be looked up either with the Thing ID or a Thing instance."
+  ([game id-or-thing]
+    (let [id (if (number? id-or-thing) id-or-thing (:id id-or-thing))]
+      ((:thing-map game) id))))
 
 (defn all-things 
   "Returns a sequence of all things in the game"
   ([game]
     (vals (:thing-map game)))
   ([game pred]
-    (find/eager-filter pred (all-things game))))
+    (filterv pred (all-things game))))
 
 ;; =======================================================
 ;; query features
@@ -442,7 +447,7 @@
              (reduce 
                (fn [pmods [k mods]]
                  (assoc pmods k
-                        (doall (find/eager-filter filt mods))))
+                        (find/eager-filter filt mods)))
                pmods
                pmods)))
     parent))
