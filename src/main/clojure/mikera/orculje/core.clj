@@ -525,9 +525,10 @@
 (defn move-thing 
   "Moves a Thing in the game. Argument must be either a thing with valid ID or an ID long.
 
-   Handles update to thing-map index.
+   Handles updates to indexes including thing-map.
    
-   Optionally merges additional property changes into the Thing"
+   Optionally merges additional property changes into the Thing. This is a useful optimisation 
+   when a Thing needs to be updated at the same time as moving (e.g. handling action costs)"
   (^Game [^Game game thing-or-id loc]
     (let [thing (or (get-thing game thing-or-id) (error "thing to move not found!!"))]
       (as-> game game
@@ -593,7 +594,7 @@
 (defn stack-thing 
   "Stacks the object source into the object dest, according to the :stack-fn function.
    Source is assumed to have been removed from the map."
-  ([game source dest]
+  ([^Game game ^Thing source ^Thing dest]
     (let [stack-fn (or (:stack-fn source) 
                        (fn [a b] (assoc b :number (+ (get-number a) (get-number b)))))]
       (as-> game game
@@ -601,13 +602,13 @@
 
 (defn merge-thing 
   "Update a thing, merging in some new properties"
-  ([game thing props]
-  (let [thing (merge (get-thing game thing) props)]
-    (update-thing game thing))))
+  ([^Game game thing-or-id props]
+    (let [thing (merge (get-thing game thing-or-id) props)]
+      (update-thing game thing))))
 
 (defn get-pred 
-  "Gets the first object satisfying a predicate in a square. Considers tile last."
-  ([game loc pred]
+  "Gets the first object satisfying a predicate in a square. Considers Things first, tile last."
+  ([^Game game ^location loc pred]
     (let [ts (get-things game loc)
           tl (get-tile game loc)]
       (or 
