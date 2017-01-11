@@ -347,28 +347,31 @@
                 (stack-thing game ob stack-target)
                 (assoc game :last-added-id (:id stack-target))))))))
 
-(defn add-thing-to-map
-  [^Game game 
-   ^Location loc 
-   ^Thing thing]
-  (let [cur-things (or (get-things game loc) [])]
-    ;; TODO: error if thing id already present
-    (or
-      (try-stack game thing cur-things)
-      (let [^PersistentTreeGrid cur-grid (:things game)
-            id (or (:id thing) (new-id game))
-            thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
-            _ (when (thing-map id) (error "Thing already present!!"))
-            new-thing (as-> thing thing
-                            (assoc thing :id id)
-                            (assoc thing :location loc))
-            new-things (conj cur-things new-thing)]
-        (as-> game game
-              (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
-              (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
-              (assoc game :last-added-id id))))))
+(defn- add-thing-to-map
+  "Adds the Thing to the map location.
 
-(defn add-child-modifiers 
+   WARNING: Should not call directly. Use add-thing instead."
+  ([^Game game 
+    ^Location loc 
+    ^Thing thing]
+    (let [cur-things (or (get-things game loc) [])]
+      ;; TODO: error if thing id already present
+      (or
+        (try-stack game thing cur-things)
+        (let [^PersistentTreeGrid cur-grid (:things game)
+              id (or (:id thing) (new-id game))
+              thing-map (or (:thing-map game) (error "No thing-map found ?!?"))
+              _ (when (thing-map id) (error "Thing already present!!"))
+              new-thing (as-> thing thing
+                              (assoc thing :id id)
+                              (assoc thing :location loc))
+              new-things (conj cur-things new-thing)]
+          (as-> game game
+                (assoc game :things (.set cur-grid (.x loc) (.y loc) (.z loc) new-things))
+                (assoc game :thing-map (add-thingmap-recursive (:thing-map game) new-thing))
+                (assoc game :last-added-id id)))))))
+
+(defn- add-child-modifiers 
   ([parent child]
     (if-let [pmods (:parent-modifiers child)]
       (add-child-modifiers parent child pmods)
@@ -431,7 +434,7 @@
       (add-thing-to-map game loc thing)
       (add-thing-to-thing game loc thing))))
 
-(defn remove-thing-from-map 
+(defn- remove-thing-from-map 
   "Removes a Thing from the game. Thing must have a valid current :id, and be present on the map."
   (^Game [^Game game ^Thing thing]
     (let [thing-map (:thing-map game)
@@ -446,7 +449,7 @@
         (assoc game :things (.set things x y z reduced-thing-vec))
         (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id))))))
 
-(defn remove-child-modifiers [parent child-id]
+(defn- remove-child-modifiers [parent child-id]
   (if-let [pmods (:modifiers parent)]
     (let [filt #(if (= child-id (:source %)) nil %)]
       (assoc parent :modifiers
@@ -480,16 +483,18 @@
 (defn remove-thing
   "Removes a Thing from the game (either on the map or a child thing).
 
-   Thing may be either an ID or a thing with a valid :id field."
-  ([game thing]
-    (if-let [thing (get-thing game thing)]
+   Thing may be either an ID or a thing with a valid :id field.
+
+   An optional number may be provided to remove from a stack."
+  ([game thing-or-id]
+    (if-let [thing (get-thing game thing-or-id)]
       (let [loc (or (:location thing) (error "Thing is not present!"))]
         (if (instance? Location loc)
           (remove-thing-from-map game thing)
           (remove-thing-from-thing game loc thing)))
       game))
-  ([game thing number]
-    (let [thing (get-thing game thing)
+  ([game thing-or-id number]
+    (let [thing (get-thing game thing-or-id)
           num (get-number thing)]
       (cond 
         (== num number)
@@ -570,9 +575,9 @@
 (defn update-thing
   "Updates a Thing within the game by providing a modified Thing. 
    Thing provided must have valid ID and location
-   Warning: must not break validation rules, children must be correct and complete etc." 
+   WARNING: must not break validation rules, children must be correct and complete etc." 
   (^Game [^Game game ^Thing changed-thing]
-    (let [id (or (:id changed-thing) (error "No valid ID on updated thing"))
+    (let [id (or (:id changed-thing) (error "No valid ID on updated Thing"))
           old-thing (get-thing game changed-thing)
           l (or (:location old-thing) (error "Thing to be updated has no :location!"))]
       ; (println (str "Updating: " (into {} changed-thing)))
