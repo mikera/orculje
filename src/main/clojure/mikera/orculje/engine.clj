@@ -16,7 +16,7 @@
 ;; about the same overhead as a single boxed long.
 ;; this is a big win!
 
-(deftype Location [^int x ^int y ^int z]
+(deftype Location [^long x ^long y ^long z]
   clojure.lang.Indexed
     (nth [loc i]
       (let [li (long i)]
