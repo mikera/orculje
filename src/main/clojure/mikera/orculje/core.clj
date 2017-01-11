@@ -420,27 +420,31 @@
                 (valid (:things (get-thing game parent)))
                 game))))))
 
-(defn add-thing ^Game [game loc thing]
-  (or thing (error "Can't add a nil thing!!"))
-  (if (instance? Location loc)
-    (add-thing-to-map game loc thing)
-    (add-thing-to-thing game loc thing)))
+(defn add-thing 
+  "Adds a Thing to the game. 
+
+   Thing must not already be present in the game, i.e. must have a nil :id. 
+   Use move-thing instead to move a thing that is already present."
+  (^Game [^Game game loc thing]
+    (or thing (error "Can't add a nil thing!!"))
+    (if (instance? Location loc)
+      (add-thing-to-map game loc thing)
+      (add-thing-to-thing game loc thing))))
 
 (defn remove-thing-from-map 
-  ^Game
-  [^Game game 
-   ^Thing thing]
-  (let [thing-map (:thing-map game)
-        things ^PersistentTreeGrid (:things game)
-        id (or (:id thing) (error "Thing has no ID!"))
-        thing (or (thing-map id) (error "Can't find thing! " id))
-        ^Location loc (or (:location thing) (error "Thing is not on map!"))
-        x (.x loc) y (.y loc) z (.z loc)
-        thing-vec (.get things x y z)
-        reduced-thing-vec (remove-from-vector thing thing-vec)]
-    (as-> game game
-      (assoc game :things (.set things x y z reduced-thing-vec))
-      (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id)))))
+  "Removes a Thing from the game. Thing must have a valid current :id, and be present on the map."
+  (^Game [^Game game ^Thing thing]
+    (let [thing-map (:thing-map game)
+          things ^PersistentTreeGrid (:things game)
+          id (or (:id thing) (error "Thing has no ID!"))
+          thing (or (thing-map id) (error "Can't find thing! " id))
+          ^Location loc (or (:location thing) (error "Thing is not on map!"))
+          x (.x loc) y (.y loc) z (.z loc)
+          thing-vec (.get things x y z)
+          reduced-thing-vec (remove-from-vector thing thing-vec)]
+      (as-> game game
+        (assoc game :things (.set things x y z reduced-thing-vec))
+        (assoc game :thing-map (remove-thingmap-recursive (:thing-map game) id))))))
 
 (defn remove-child-modifiers [parent child-id]
   (if-let [pmods (:modifiers parent)]
@@ -474,6 +478,9 @@
       )))
 
 (defn remove-thing
+  "Removes a Thing from the game (either on the map or a child thing).
+
+   Thing may be either an ID or a thing with a valid :id field."
   ([game thing]
     (if-let [thing (get-thing game thing)]
       (let [loc (or (:location thing) (error "Thing is not present!"))]
@@ -515,13 +522,29 @@
 ;      (assoc :thing-map (assoc thing-map id new-thing))
 ;      (assoc :last-added-id id))))
 
-(defn move-thing [game thing loc]
-  (let [thing (or (get-thing game thing) (error "thing to move not found!!"))]
-    (as-> game game
-          (remove-thing game thing)
-          (add-thing game loc thing))))
+(defn move-thing 
+  "Moves a Thing in the game. Argument must be either a thing with valid ID or an ID long.
 
-(defn- update-thing-within-parent [game parent-id changed-id changed-thing]
+   Handles update to thing-map index.
+   
+   Optionally merges additional property changes into the Thing"
+  (^Game [^Game game thing-or-id loc]
+    (let [thing (or (get-thing game thing-or-id) (error "thing to move not found!!"))]
+      (as-> game game
+            (remove-thing game thing)
+            (add-thing game loc thing))))
+  (^Game [^Game game thing-or-id loc new-props]
+    (let [thing (or (get-thing game thing-or-id) (error "thing to move not found!!"))]
+      (as-> game game
+            (remove-thing game thing)
+            (add-thing game loc (merge thing new-props)))))
+  (^Game [^Game game thing-or-id loc key value]
+    (let [thing (or (get-thing game thing-or-id) (error "thing to move not found!!"))]
+      (as-> game game
+            (remove-thing game thing)
+            (add-thing game loc (assoc thing key value))))))
+
+(defn- update-thing-within-parent [^Game game parent-id changed-id changed-thing]
   (let [tm (:thing-map game) 
         parent (or (tm parent-id) (error "Parent not found!!"))
         pconts (or (:things parent) (error "Parent has no things?!?"))
@@ -533,7 +556,7 @@
     (as-> game game
       (update-thing game new-parent))))
 
-(defn- update-thing-within-map [game ^Location tloc changed-id changed-thing]
+(defn- update-thing-within-map [^Game game ^Location tloc changed-id changed-thing]
   (let [x (.x tloc) y (.y tloc) z (.z tloc)
         ^PersistentTreeGrid grid (:things game) 
         lconts (or (.get grid x y z) (error "Map location has no things?!?"))
@@ -544,10 +567,10 @@
 
 
 (defn update-thing
-  "Updates a thing within the game. Thing must have valid ID and location
+  "Updates a Thing within the game by providing a modified Thing. 
+   Thing provided must have valid ID and location
    Warning: must not break validation rules, children must be correct and complete etc." 
-  (^Game [^Game game 
-                                ^Thing changed-thing]
+  (^Game [^Game game ^Thing changed-thing]
     (let [id (or (:id changed-thing) (error "No valid ID on updated thing"))
           old-thing (get-thing game changed-thing)
           l (or (:location old-thing) (error "Thing to be updated has no :location!"))]

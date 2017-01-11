@@ -177,48 +177,73 @@
 
 (deftest test-thing-locations
   (let [game (empty-game)
-          l (loc 1 2 3)
-          t (thing {:foo :bar})
-          game (add-thing game l t)
-          ts (get-things game l)
-          nt (first ts)
-          new-id (:id nt)]
-      (testing "finder"
-        (is (not (find-things game :id (loc 0 0 0) (loc 1 1 1))))
-        (is (= nt (first (find-things game :id (loc 0 0 0) (loc 3 3 3)))))
-        (is (= nt (find-nearest-thing game :id (loc 0 0 3) 10)))
-        (is (not (find-nearest-thing game :id (loc 0 0 0) 0)))
-        (is (not (find-nearest-thing game :id (loc 0 0 0) 10))) ;; not on same z-plane
-        )
+        l (loc 1 2 3)
+        t (thing {:foo :bar})
+        game (add-thing game l t)
+        ts (get-things game l)
+        nt (first ts)
+        new-id (:id nt)]
+    (testing "finder"
+      (is (not (find-things game :id (loc 0 0 0) (loc 1 1 1))))
+      (is (= nt (first (find-things game :id (loc 0 0 0) (loc 3 3 3)))))
+      (is (= nt (find-nearest-thing game :id (loc 0 0 3) 10)))
+      (is (not (find-nearest-thing game :id (loc 0 0 0) 0)))
+      (is (not (find-nearest-thing game :id (loc 0 0 0) 10))) ;; not on same z-plane
+      )
       
-      (testing "adding to map" 
-        (is (= 1 (count ts)))
-	      (is (vector? ts))
-	      (is (= l (:location nt)))
-        (is (= l (location game nt)))
-	      (is new-id)
-	      (is (= nt ((:thing-map game) new-id)))
-	      (is (= :bar (? nt :foo)))
-	      (is (= :bar (? game nt :foo)))
-        (is (validate game)))
-      (testing "update"
-        (let [game (! game nt :changed true)] 
-          (is (not (:changed nt)))
-          (is (:changed (get-thing game nt)))
-          (is (validate game))))
-      (testing "add"
-        (let [game (!+ game nt :something 100)] 
-          (is (== 100 (? game nt :something)))
-          (is (validate game))))
-      (testing "move with map"
-        (let [nloc (loc 11 12 13)
-              game (move-thing game nt nloc)
-              ots (get-things game l)]
-          (is (not (seq ots)))
-          (is (seq (get-things game nloc)))
-          (is (validate game))))
-      (testing "removal from map"
-        (let [game (remove-thing game nt)
-              ts (get-things game l)]
-          (is (not (seq ts)))
-          (is (validate game))))))
+    (testing 
+      "adding to map" 
+      (is (= 1 (count ts)))
+      (is (vector? ts))
+      (is (= l (:location nt)))
+      (is (= l (location game nt)))
+	    (is new-id)
+	    (is (= nt ((:thing-map game) new-id)))
+	    (is (= :bar (? nt :foo)))
+	    (is (= :bar (? game nt :foo)))
+      (is (validate game)))
+    (testing 
+      "update"
+      (let [game (! game nt :changed true)] 
+        (is (not (:changed nt)))
+        (is (:changed (get-thing game nt)))
+        (is (validate game))))
+    (testing 
+      "add"
+      (let [game (!+ game nt :something 100)] 
+        (is (== 100 (? game nt :something)))
+        (is (validate game))))
+    (testing 
+      "move within map"
+      (let [nloc (loc 11 12 13)
+            game (move-thing game nt nloc)
+            ots (get-things game l)]
+        (is (not (seq ots)))
+        (is (seq (get-things game nloc)))
+        (is (validate game))))
+    (testing 
+      "move within map and assoc"
+      (let [nloc (loc 11 12 13)
+            game (move-thing game nt nloc :arbitrary-key :foo)
+            ots (get-things game l)]
+        (is (not (seq ots)))
+        (let [new-loc-things (get-things game nloc)]
+          (is (seq new-loc-things))
+          (is (= :foo (:arbitrary-key (first new-loc-things)))))
+        (is (validate game))))
+    (testing 
+      "move within map and marge"
+      (let [nloc (loc 11 12 13)
+            game (move-thing game nt nloc {:arbitrary-key1 :foo :arbitrary-key2 :bar})
+            ots (get-things game l)]
+        (is (not (seq ots)))
+        (let [new-loc-things (get-things game nloc)]
+          (is (seq new-loc-things))
+          (is (= :foo (:arbitrary-key1 (first new-loc-things))))
+          (is (= :bar (:arbitrary-key2 (first new-loc-things)))))
+        (is (validate game))))
+    (testing "removal from map"
+      (let [game (remove-thing game nt)
+            ts (get-things game l)]
+        (is (not (seq ts)))
+        (is (validate game))))))
