@@ -688,34 +688,43 @@
 
 
 ;; ======================================================
-;; validation code
+;; validation functions
 
 (defn validate-modifiers
   [game thing]
   (when-let [mods (:modifiers thing)]
-    (valid (associative? mods))
-    (valid (not (vector? mods)))
+    (valid (associative? mods) "Modifiers must be an associative structure.")
+    (valid (not (vector? mods)) "Modifiers must not be a vector.")
     (doseq [[k mod-list] mods]
-      (valid (or (nil? mod-list) (sequential? mod-list))))))
+      (valid (or (nil? mod-list) (sequential? mod-list))
+             "modifier list for key " k " must be either empty or sequential?"))))
+
+(defn validate-thing [thing]
+  (let [thing-id (:id thing)] 
+    (valid (and thing-id (instance? Long thing-id)) 
+           "Thing does not have a valid ID")
+    (valid (or (nil? (:things thing)) (vector? (:things thing)))
+           "Thing contents in :things must be empty or a persistent vector of children")))
 
 (defn validate-game-thing [game thing]
-  (valid (:id thing))
-  (valid (or (nil? (:things thing)) (vector? (:things thing))))
-  (valid (loc? (location game thing)))
-  (if-let [loc (:location thing)]
-    (if (loc? loc)
-      (let [^Location loc loc]
-        (valid 
-          (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))
-          (str "Cannot find thing within map contents vector for location.")))
-      (do 
-        (valid (number? loc))
-        (valid (loc? (location game thing))))))
-  (doseq [child (contents thing)]
-    (validate-game-thing game child)
-    (valid (identical? child (get-thing game child)))
-    (valid (= (:id thing) (:location child))))
-  (validate-modifiers game thing))
+  (validate-thing thing)
+  (let [thing-id (:id thing)] 
+    (valid (identical? thing (get-thing game thing)) "Thing not the same as stored in game")
+    (valid (loc? (location game thing)))
+    (if-let [loc (:location thing)]
+      (if (loc? loc)
+        (let [^Location loc loc]
+          (valid 
+            (<= 0 (find-identical-position thing (.get ^PersistentTreeGrid (:things game) (.x loc) (.y loc) (.z loc))))
+            (str "Cannot find thing within map contents vector for location.")))
+        (do 
+          (valid (instance? Long loc) "Thing ID must be a Long when used as a location")
+          (valid (loc? (location game thing)) "Ultimate parent must have a Location"))))
+    (doseq [child (contents thing)]
+      (validate-game-thing game child)
+      (valid (identical? child (get-thing game child)))
+      (valid (= thing-id (:location child))))
+    (validate-modifiers game thing)))
 
 (defn validate-game [game]
   (valid (instance? Game game))
