@@ -608,7 +608,7 @@
 
 (defn get-pred 
   "Gets the first object satisfying a predicate in a square. Considers Things first, tile last."
-  ([^Game game ^location loc pred]
+  ([^Game game ^Location loc pred]
     (let [ts (get-things game loc)
           tl (get-tile game loc)]
       (or 
@@ -617,7 +617,7 @@
 
 (defn get-blocking 
   "Gets the object blocking a specific square"
-  ([game loc]
+  ([^Game game ^Location loc]
     (let [ts (get-things game loc)
           tl (get-tile game loc)]
       (or 
