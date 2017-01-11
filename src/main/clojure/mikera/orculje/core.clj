@@ -597,10 +597,10 @@
          (map-equals-except #{:id :location :number} a b))))
 
 (defn stack-thing 
-  "Stacks the object source into the object dest, according to the :stack-fn function.
+  "Stacks the object source into the object dest, according to the dest :stack-fn function.
    Source is assumed to have been removed from the map."
   ([^Game game ^Thing source ^Thing dest]
-    (let [stack-fn (or (:stack-fn source) 
+    (let [stack-fn (or (:stack-fn dest) 
                        (fn [a b] (assoc b :number (+ (get-number a) (get-number b)))))]
       (as-> game game
             (update-thing game (stack-fn source dest))))))
@@ -633,30 +633,32 @@
 ;; finder functions
 
 (defn find-nearest-thing
-  [^Game game pred ^Location loc-or-thing range]
-  (let [^Location cloc (location game loc-or-thing)
-        ^Location loc1 (loc-add cloc (loc (- range) (- range) 0))
-        ^Location loc2 (loc-add cloc (loc range range 0))
-        x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
-        x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
-        ^PersistentTreeGrid thing-grid (:things game)
-        best-distance-squared (atom Long/MAX_VALUE)
-        best-thing (atom nil)
-        find-fn (fn [x y z vs]
-                  ;;(println (str "checking things at " (loc x y z)))
-                  (dovec [v vs]
-                    (if (pred v)
-                      (let [dx (- (long x) (.x cloc))
-                            dy (- (long y) (.y cloc))
-                            dz (- (long z) (.z cloc))
-                            dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
-                        ;;(println (str "found" v " at " (loc x y z)))
-                        (when (< dist2 @best-distance-squared)
-                          (reset! best-distance-squared dist2)
-                          (reset! best-thing v))))))
-        ^Finder finder (Finder. find-fn)]
-    (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
-    @best-thing))
+  "Finds the nearest Thing to a specified location that satisfies the predicate.
+   Searches up to the provided range"
+  ([^Game game pred ^Location loc-or-thing range]
+    (let [^Location cloc (location game loc-or-thing)
+          ^Location loc1 (loc-add cloc (loc (- range) (- range) 0))
+          ^Location loc2 (loc-add cloc (loc range range 0))
+          x1 (.x loc1) y1 (.y loc1) z1 (.z loc1)
+          x2 (.x loc2) y2 (.y loc2) z2 (.z loc2)
+          ^PersistentTreeGrid thing-grid (:things game)
+          best-distance-squared (atom Long/MAX_VALUE)
+          best-thing (atom nil)
+          find-fn (fn [x y z vs]
+                    ;;(println (str "checking things at " (loc x y z)))
+                    (dovec [v vs]
+                      (if (pred v)
+                        (let [dx (- (long x) (.x cloc))
+                              dy (- (long y) (.y cloc))
+                              dz (- (long z) (.z cloc))
+                              dist2 (+ (* dx dx) (* dy dy) (* dz dz))]
+                          ;;(println (str "found" v " at " (loc x y z)))
+                          (when (< dist2 @best-distance-squared)
+                            (reset! best-distance-squared dist2)
+                            (reset! best-thing v))))))
+          ^Finder finder (Finder. find-fn)]
+      (.visitBlocks thing-grid finder x1 y1 z1 x2 y2 z2)
+      @best-thing)))
 
 (defn find-things
   [^Game game pred loc-or-thing loc2-or-range]
