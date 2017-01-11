@@ -106,11 +106,11 @@
     (engine/->Location (max (.x a) (.x b)) (max (.y a) (.y b)) (max (.z a) (.z b)))))
 
 (defn direction 
-  ^Location [^Location from-loc 
-                                   ^Location to-loc]
-  (Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
-                                   (int (Maths/sign (- (.y to-loc) (.y from-loc))))
-                                   (int (Maths/sign (- (.z to-loc) (.z from-loc))))))
+  "Gets the 3D direction between two locations as a location"
+  (^Location [^Location from-loc ^Location to-loc]
+    (Location. (int (Maths/sign (- (.x to-loc) (.x from-loc))))
+               (int (Maths/sign (- (.y to-loc) (.y from-loc))))
+               (int (Maths/sign (- (.z to-loc) (.z from-loc)))))))
 
 (defn location-towards 
   "Gets a location one square closer to the target location"

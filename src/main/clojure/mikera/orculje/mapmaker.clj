@@ -1,16 +1,17 @@
 (ns mikera.orculje.mapmaker
   (:use mikera.orculje.core)
   (:use mikera.cljutils.loops)
-  (:import [mikera.util Rand])
-  (:require [mikera.orculje.engine :as engine]))
+  (:require [mikera.orculje.engine :as engine])
+  (:import [mikera.orculje.engine Location Game Thing])
+  (:import [mikera.util Rand]))
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true)
 
 (defn fill-block 
-  ([game 
-    ^mikera.orculje.engine.Location lower 
-    ^mikera.orculje.engine.Location upper 
+  ([^Game game 
+    ^Location lower 
+    ^Location upper 
     value]
     (let [^mikera.engine.PersistentTreeGrid grid (:world game)
           x1 (min (.x lower) (.x upper))
@@ -61,12 +62,12 @@
 (defn place-thing
   "Places a thing randomly within the given area. 
    Returns nil if thing cannot be placed (i.e. if no unblocked square can be found)"
-  [game 
-   ^mikera.orculje.engine.Location la 
-   ^mikera.orculje.engine.Location lb 
+  [^Game game 
+   ^Location la 
+   ^Location lb 
    t]
-  (let [^mikera.orculje.engine.Location lower (loc-min la lb)
-        ^mikera.orculje.engine.Location upper (loc-max la lb)
+  (let [^Location lower (loc-min la lb)
+        ^Location upper (loc-max la lb)
         ^mikera.engine.PersistentTreeGrid grid (:world game)
           x1 (min (.x lower) (.x upper))
           x2 (max (.x lower) (.x upper))
@@ -86,20 +87,20 @@
 
 (defn maybe-place-thing 
   "Attempts to place a thing, returns unchanged game if placing fails" 
-  ([game l1 l2 t]
+  ([^Game game ^Location l1 ^Location l2 t]
     (or (and t (place-thing game l1 l2 t))
         game)))
 
 
 (defn scatter-things
   "Scatters a number of things in a given area, using the specified generator function" 
-  ([game l1 l2 num thing-or-func]
+  ([^Game game ^Location l1 ^Location l2 num thing-or-func]
     (reduce 
         (fn [game _]
           (maybe-place-thing game l1 l2 (if (fn? thing-or-func)
                                           (thing-or-func)
                                           thing-or-func)))
         game
-        (range num))))
+        (range (long num)))))
 
 

@@ -1,7 +1,7 @@
 (ns mikera.orculje.text
+  (:use mikera.orculje.core)
   (:use [mikera.cljutils error])
   (:require [mikera.cljutils.find :as find])
-  (:use mikera.orculje.core)
   (:import [org.atteo.evo.inflector English]))
 
 (def name-hints
