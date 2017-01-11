@@ -14,7 +14,7 @@
 ;; type to represent an immutable (x,y,z) location
 ;; note that because of cache line sizes, a Location has 
 ;; about the same overhead as a single boxed long.
-;; this is a big win!
+;; this is a big performance win!
 
 (deftype Location [^long x ^long y ^long z]
   clojure.lang.Indexed
@@ -68,7 +68,7 @@
 
 (defrecord Game [^PersistentTreeGrid world    ;; grid of terrain
                  ^PersistentTreeGrid things   ;; grid of things (contains vectors)
-                 thing-map                    ;; map of id -> thing
+                 thing-map                    ;; hashmap of id -> thing
                  ])
 
 (defrecord Thing [])
